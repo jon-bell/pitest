@@ -34,6 +34,7 @@ public class CoverageTransformer implements ClassFileTransformer {
     final boolean include = shouldInclude(className);
     if (include) {
       try {
+          return transformBytes(loader, className, classfileBuffer);
       } catch (final RuntimeException t) {
         System.err.println("RuntimeException while transforming  " + className);
         t.printStackTrace();
