@@ -37,6 +37,7 @@ import org.pitest.functional.FCollection;
 import org.pitest.functional.prelude.Prelude;
 import org.pitest.help.Help;
 import org.pitest.help.PitHelpError;
+import org.pitest.mutationtest.CoverageListener;
 import org.pitest.mutationtest.HistoryStore;
 import org.pitest.mutationtest.ListenerArguments;
 import org.pitest.mutationtest.MutationAnalyser;
@@ -137,6 +138,10 @@ public class MutationCoverage {
 
     recordClassPath(coverageData);
 
+    for(MutationResultListener r : config)
+    	if(r instanceof CoverageListener)
+    		((CoverageListener) r).handleCoverageData(code,coverageData);
+    
     LOG.fine("Used memory before analysis start "
         + ((runtime.totalMemory() - runtime.freeMemory()) / MB) + " mb");
     LOG.fine("Free Memory before analysis start " + (runtime.freeMemory() / MB)

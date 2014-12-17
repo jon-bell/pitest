@@ -14,10 +14,13 @@
  */
 package org.pitest.mutationtest.config;
 
+import org.pitest.classpath.CodeSource;
+import org.pitest.coverage.CoverageDatabase;
 import org.pitest.mutationtest.ClassMutationResults;
+import org.pitest.mutationtest.CoverageListener;
 import org.pitest.mutationtest.MutationResultListener;
 
-public class CompoundTestListener implements MutationResultListener {
+public class CompoundTestListener implements MutationResultListener, CoverageListener {
 
   private final Iterable<MutationResultListener> children;
 
@@ -33,6 +36,13 @@ public class CompoundTestListener implements MutationResultListener {
 
   }
 
+  public void handleCoverageData(CodeSource code, CoverageDatabase coverageData) {
+    for (final MutationResultListener each : this.children) {
+      if (each instanceof CoverageListener)
+        ((CoverageListener) each).handleCoverageData(code, coverageData);
+    }
+  }
+  
   @Override
   public void handleMutationResult(final ClassMutationResults metaData) {
     for (final MutationResultListener each : this.children) {

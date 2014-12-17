@@ -176,6 +176,7 @@ public class MutationTestWorker {
         List<TestResult> results = new ArrayList<TestResult>();
         if(dontStopAtMutantKilled)
         {
+            System.err.println("Dont stop at mutant killed activated");
         	final ConcreteResultCollector rc = 
     	            new ConcreteResultCollector(results);
     	        group.execute(activeloader, rc);
