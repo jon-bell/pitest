@@ -19,6 +19,8 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 
+import de.unisb.cs.st.javaslicer.tracer.Tracer;
+
 public class HotSwapAgent {
 
   private static Instrumentation instrumentation;
@@ -30,7 +32,15 @@ public class HotSwapAgent {
   }
 
   public static void addTransformer(final ClassFileTransformer transformer) {
-    instrumentation.addTransformer(transformer);
+      if(Tracer.isAvailable())
+      {
+          ClassFileTransformer t = Tracer.getInstance().getTransformer();
+          instrumentation.removeTransformer(t);
+          instrumentation.addTransformer(transformer);
+          instrumentation.addTransformer(t);
+      }
+      else
+          instrumentation.addTransformer(transformer);
   }
 
   public static void agentmain(final String agentArguments, // NO_UCD
@@ -48,12 +58,16 @@ public class HotSwapAgent {
       return true;
     } catch (final ClassNotFoundException e) {
       // swallow
+        e.printStackTrace();
     } catch (final UnmodifiableClassException e) {
       // swallow
+        e.printStackTrace();
     } catch (final java.lang.VerifyError e) {
+        e.printStackTrace();
       // swallow
     } catch (final java.lang.InternalError e) {
       // swallow
+        e.printStackTrace();
     }
     return false;
   }

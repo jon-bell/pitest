@@ -17,6 +17,7 @@ package org.pitest.junit.adapter;
 
 import static org.pitest.util.Unchecked.translateCheckedException;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -38,6 +39,9 @@ import org.pitest.util.ClassLoaderDetectionStrategy;
 import org.pitest.util.IsolationUtils;
 import org.pitest.util.Log;
 import org.pitest.util.Unchecked;
+
+import de.unisb.cs.st.javaslicer.tracer.Tracer;
+import edu.columbia.cs.psl.testprof.TracerConnector;
 
 public class AdaptedJUnitTestUnit extends AbstractTestUnit {
 
@@ -75,6 +79,10 @@ public class AdaptedJUnitTestUnit extends AbstractTestUnit {
     checkForErrorRunner(runner);
     filterIfRequired(rc, runner);
 
+    String logName = TracerConnector.allMutations.size() +"."+this.getDescription().getName();
+    if(Tracer.isAvailable())
+        Tracer.getInstance().writeOutAndStartFresh(logName);
+    
     try {
       if (this.loaderDetection.fromDifferentLoader(runner.getClass(), loader)) {
         executeInDifferentClassLoader(loader, rc, runner);
@@ -89,6 +97,13 @@ public class AdaptedJUnitTestUnit extends AbstractTestUnit {
       LOG.log(Level.SEVERE, "Error while running adapter JUnit fixture "
           + this.clazz + " with filter " + this.filter, e);
       throw translateCheckedException(e);
+    } finally {
+        try {
+            if(Tracer.isAvailable())
+                Tracer.getInstance().finish();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
   }

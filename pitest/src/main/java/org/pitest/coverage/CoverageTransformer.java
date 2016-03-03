@@ -1,5 +1,7 @@
 package org.pitest.coverage;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
@@ -32,7 +34,6 @@ public class CoverageTransformer implements ClassFileTransformer {
     final boolean include = shouldInclude(className);
     if (include) {
       try {
-        return transformBytes(loader, className, classfileBuffer);
       } catch (final RuntimeException t) {
         System.err.println("RuntimeException while transforming  " + className);
         t.printStackTrace();
@@ -45,6 +46,7 @@ public class CoverageTransformer implements ClassFileTransformer {
 
   private byte[] transformBytes(final ClassLoader loader,
       final String className, final byte[] classfileBuffer) {
+      try{
     final ClassReader reader = new ClassReader(classfileBuffer);
     final ClassWriter writer = new ComputeClassWriter(
         new ClassloaderByteArraySource(loader), this.computeCache,
@@ -54,6 +56,12 @@ public class CoverageTransformer implements ClassFileTransformer {
     reader.accept(new CoverageClassVisitor(id, writer),
         ClassReader.EXPAND_FRAMES);
     return writer.toByteArray();
+      }
+      catch(Throwable t)
+      {
+          t.printStackTrace();
+          return null;
+      }
   }
 
   private boolean shouldInclude(final String className) {

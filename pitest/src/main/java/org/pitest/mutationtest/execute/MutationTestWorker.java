@@ -45,6 +45,9 @@ import org.pitest.testapi.execute.containers.UnContainer;
 import org.pitest.util.IsolationUtils;
 import org.pitest.util.Log;
 
+import de.unisb.cs.st.javaslicer.tracer.Tracer;
+import edu.columbia.cs.psl.testprof.TracerConnector;
+
 public class MutationTestWorker {
 
   private static final Logger                               LOG   = Log
@@ -95,6 +98,8 @@ public class MutationTestWorker {
     // bytes are returned
     JavassistInterceptor.setMutant(mutatedClass);
 
+    TracerConnector.allMutations.add(mutationDetails);
+    
     if (DEBUG) {
       LOG.fine("mutating method " + mutatedClass.getDetails().getMethod());
     }

@@ -43,6 +43,8 @@ import org.pitest.mutationtest.engine.MutationDetails;
 import org.pitest.mutationtest.engine.MutationIdentifier;
 import org.pitest.mutationtest.engine.gregor.inlinedcode.InlinedCodeFilter;
 
+import de.unisb.cs.st.javaslicer.tracer.Tracer;
+
 public class GregorMutater implements Mutater {
 
   private final Map<String, String>       computeCache   = new HashMap<String, String>();
@@ -133,7 +135,18 @@ public class GregorMutater implements Mutater {
     final List<MutationDetails> details = context.getMutationDetails(context
         .getTargetMutation().value());
 
-    return new Mutant(details.get(0), w.toByteArray());
+    if(Tracer.isAvailable())
+    {
+        byte[] b = w.toByteArray();
+        byte[] r = Tracer.getInstance().getTransformer().transform0(id.getClassName().asInternalName(), id.getClassName().asJavaName(), b);
+        if(r != null)
+        {
+            b = r;
+        }
+        return new Mutant(details.get(0), b);
+    }
+    else
+        return new Mutant(details.get(0), w.toByteArray());
 
   }
 

@@ -89,10 +89,16 @@ public class WrappingProcess {
 
     List<String> cmd = new ArrayList<String>();
     cmd.add(javaProcess);
-    cmd.addAll(args);
 
     addPITJavaAgent(agentJarLocator, cmd);
     addLaunchJavaAgents(cmd);
+
+    for(String s : args)
+    {
+        if(s.equals("-Ddebug"))
+            cmd.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005");
+    }
+    cmd.addAll(args);
 
     cmd.add(mainClass.getName());
     cmd.addAll(programArgs);
