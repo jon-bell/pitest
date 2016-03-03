@@ -65,123 +65,128 @@ public enum ConfigOption {
    * Multiple of normal runtime to allow before considering a mutation to have
    * timed out
    */
-  TIMEOUT_FACTOR("timeoutFactor",
-      PercentAndConstantTimeoutStrategy.DEFAULT_FACTOR),
-      /**
-       * Consant addiotnal period of time to allow before considering a mutation to
-       * have timed out
-       */
-      TIMEOUT_CONST("timeoutConst",
-          PercentAndConstantTimeoutStrategy.DEFAULT_CONSTANT),
-          /**
-           * Filter limiting tests to be considered
-           */
-          TEST_FILTER("targetTests"),
-          /**
-           * List of classes no to mutate lines of calls that contain call to
-           */
-          AVOID_CALLS("avoidCallsTo"),
-          /**
-           * Filter of methods not to be mutated
-           */
-          EXCLUDED_METHOD("excludedMethods"),
-          /**
-           * Maximum number of mutations to allow per class
-           */
-          MAX_MUTATIONS_PER_CLASS("maxMutationsPerClass", 0),
-          /**
-           * Flag to indicate if verbose logging should be enabled
-           */
-          VERBOSE("verbose", false),
-          /**
-           * Filter defining classes to exclude (both tests and mutees)
-           */
-          EXCLUDED_CLASSES("excludedClasses"),
-          /**
-           * Formats in which to output results
-           */
-          OUTPUT_FORMATS("outputFormats"),
+    TIMEOUT_FACTOR("timeoutFactor", PercentAndConstantTimeoutStrategy.DEFAULT_FACTOR),
+    /**
+     * Consant addiotnal period of time to allow before considering a mutation
+     * to have timed out
+     */
+    TIMEOUT_CONST("timeoutConst", PercentAndConstantTimeoutStrategy.DEFAULT_CONSTANT),
+    /**
+     * Filter limiting tests to be considered
+     */
+    TEST_FILTER("targetTests"),
+    /**
+     * List of classes no to mutate lines of calls that contain call to
+     */
+    AVOID_CALLS("avoidCallsTo"),
+    /**
+     * Filter of methods not to be mutated
+     */
+    EXCLUDED_METHOD("excludedMethods"),
+    /**
+     * Maximum number of mutations to allow per class
+     */
+    MAX_MUTATIONS_PER_CLASS("maxMutationsPerClass", 0),
+    /**
+     * Flag to indicate if verbose logging should be enabled
+     */
+    VERBOSE("verbose", false),
+    /**
+     * Filter defining classes to exclude (both tests and mutees)
+     */
+    EXCLUDED_CLASSES("excludedClasses"),
+    /**
+     * Formats in which to output results
+     */
+    OUTPUT_FORMATS("outputFormats"),
 
-          /**
-           * Classpath entries to analyse. Although classes on the launch classpath will
-   * also be analysed, this is the preferred place to specify the code to
-   * analyse
-           */
-          CLASSPATH("classPath"),
-          /**
-           * Flag to indicate if an error should be thrown if no mutations found
-           */
-          FAIL_WHEN_NOT_MUTATIONS("failWhenNoMutations", true),
-          /**
-           * Filter defining paths that should be treated as containing mutable code
-           */
-          CODE_PATHS("mutableCodePaths"),
-          /**
-           * TestNG groups/JUnit categories to include
-           */
-          INCLUDED_GROUPS("includedGroups"),
-          /**
-           * TestNG groupsJUnit categories to exclude
-           */
-          EXCLUDED_GROUPS("excludedGroups"),
-          /**
-           * Maximum number of mutations to include within a single unit of analysis.
-           */
-          MUTATION_UNIT_SIZE("mutationUnitSize", 0),
+    /**
+     * Classpath entries to analyse. Although classes on the launch classpath
+     * will also be analysed, this is the preferred place to specify the code to
+     * analyse
+     */
+    CLASSPATH("classPath"),
+    /**
+     * Flag to indicate if an error should be thrown if no mutations found
+     */
+    FAIL_WHEN_NOT_MUTATIONS("failWhenNoMutations", true),
+    /**
+     * Filter defining paths that should be treated as containing mutable code
+     */
+    CODE_PATHS("mutableCodePaths"),
+    /**
+     * TestNG groups/JUnit categories to include
+     */
+    INCLUDED_GROUPS("includedGroups"),
+    /**
+     * TestNG groupsJUnit categories to exclude
+     */
+    EXCLUDED_GROUPS("excludedGroups"),
+    /**
+     * Maximum number of mutations to include within a single unit of analysis.
+     */
+    MUTATION_UNIT_SIZE("mutationUnitSize", 0),
 
-          /**
-           * Do/don't attempt to detect inlined code from finally blocks
-           */
-          USE_INLINED_CODE_DETECTION("detectInlinedCode", true),
+    /**
+     * Do/don't attempt to detect inlined code from finally blocks
+     */
+    USE_INLINED_CODE_DETECTION("detectInlinedCode", true),
 
-          /**
-           * Location to read history from for incremental analysis
-           */
-          HISTORY_INPUT_LOCATION("historyInputLocation"),
+    /**
+     * Location to read history from for incremental analysis
+     */
+    HISTORY_INPUT_LOCATION("historyInputLocation"),
 
-          /**
-           * Location to write history to for incremental analysis
-           */
-          HISTORY_OUTPUT_LOCATION("historyOutputLocation"),
+    /**
+     * Location to write history to for incremental analysis
+     */
+    HISTORY_OUTPUT_LOCATION("historyOutputLocation"),
 
-          /**
-           * Mutation score below which to throw an error
-           */
-          MUTATION_THRESHOLD("mutationThreshold", 0),
+    /**
+     * Mutation score below which to throw an error
+     */
+    MUTATION_THRESHOLD("mutationThreshold", 0),
 
-          /**
-           * Line coverage score below which to throw an error
-           */
-          COVERAGE_THRESHOLD("coverageThreshold", 0),
+    /**
+     * Line coverage score below which to throw an error
+     */
+    COVERAGE_THRESHOLD("coverageThreshold", 0),
 
-          /**
-           * Mutation engine to use
-           */
-          MUTATION_ENGINE("mutationEngine", "gregor"),
+    /**
+     * Mutation engine to use
+     */
+    MUTATION_ENGINE("mutationEngine", "gregor"),
 
-          /**
-           * Dump per test line coverage to disk
-           */
-          EXPORT_LINE_COVERAGE("exportLineCoverage", false),
+    /**
+     * Dump per test line coverage to disk
+     */
+    EXPORT_LINE_COVERAGE("exportLineCoverage", false),
 
-  /**
-           * Include launch classpath in analysis
-           */
-          INCLUDE_LAUNCH_CLASSPATH("includeLaunchClasspath", true),
+    /**
+     * Include launch classpath in analysis
+     */
+    INCLUDE_LAUNCH_CLASSPATH("includeLaunchClasspath", true),
 
-          /**
-           * Path to executable with which to run tests
-           */
-          JVM_PATH("jvmPath"),
+    /**
+     * Path to executable with which to run tests
+     */
+    JVM_PATH("jvmPath"),
 
-  /**
-           * Custom properties for plugins
-           */
-          PLUGIN_CONFIGURATION("pluginConfiguration");
+    /**
+     * Custom properties for plugins
+     */
+    PLUGIN_CONFIGURATION("pluginConfiguration"),
+    /**
+     * Should we keep going with running more tests against the same mutant,
+     * even when that mutant was killed?
+     */
+    DONT_STOP_WHEN_MUTANT_KILLED("dontStopAtMutantKilled",false);
+
 
   private final String       text;
   private final Serializable defaultValue;
 
+ 
   ConfigOption(final String text) {
     this(text, null);
   }

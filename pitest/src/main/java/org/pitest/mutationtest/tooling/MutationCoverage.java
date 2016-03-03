@@ -251,7 +251,7 @@ public class MutationCoverage {
         .getConfiguration(), mutationConfig,
         new PercentAndConstantTimeoutStrategy(this.data.getTimeoutFactor(),
             this.data.getTimeoutConstant()), this.data.isVerbose(), this.data
-            .getClassPath().getLocalClassPath());
+            .getClassPath().getLocalClassPath(), this.data.isDontStopAtMutantKilled());
 
     MutationGrouper grouper = this.settings.getMutationGrouper().makeFactory(
         this.data.getFreeFormProperties(), this.code,

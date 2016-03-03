@@ -121,6 +121,7 @@ public class ReportOptions {
   private boolean                        includeLaunchClasspath         = true;
 
   private Properties                     properties;
+  private boolean                        dontStopAtMutantKilled         = false;
 
   public boolean isVerbose() {
     return this.verbose;
@@ -576,6 +577,14 @@ public class ReportOptions {
         + this.coverageThreshold + ", mutationEngine=" + this.mutationEngine
         + ", javaExecutable=" + this.javaExecutable
         + ", includeLaunchClasspath=" + this.includeLaunchClasspath + "]";
+  }
+
+  public boolean isDontStopAtMutantKilled() {
+    return this.dontStopAtMutantKilled;
+  }
+
+  public void setDontStopAtMutantKilled(boolean dontStopAtMutantKilled) {
+    this.dontStopAtMutantKilled = dontStopAtMutantKilled;
   }
 
 }

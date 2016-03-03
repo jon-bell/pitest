@@ -26,17 +26,25 @@ public class WorkerFactory {
   private final TimeoutLengthStrategy timeoutStrategy;
   private final boolean               verbose;
   private final MutationConfig        config;
+  private final boolean               dontStopAtMutantKilled;
 
   public WorkerFactory(final File baseDir, final Configuration pitConfig,
       final MutationConfig mutationConfig,
       final TimeoutLengthStrategy timeoutStrategy, final boolean verbose,
       final String classPath) {
+    this(baseDir, pitConfig, mutationConfig, timeoutStrategy, verbose, classPath, false);
+  }
+  public WorkerFactory(final File baseDir, final Configuration pitConfig,
+      final MutationConfig mutationConfig,
+      final TimeoutLengthStrategy timeoutStrategy, final boolean verbose,
+      final String classPath, final boolean dontStopAtMutantKilled) {
     this.pitConfig = pitConfig;
     this.timeoutStrategy = timeoutStrategy;
     this.verbose = verbose;
     this.classPath = classPath;
     this.baseDir = baseDir;
     this.config = mutationConfig;
+    this.dontStopAtMutantKilled = dontStopAtMutantKilled;
   }
 
   public MutationTestProcess createWorker(
@@ -44,7 +52,7 @@ public class WorkerFactory {
       final Collection<ClassName> testClasses) {
     final MinionArguments fileArgs = new MinionArguments(remainingMutations,
         testClasses, this.config.getEngine(), this.timeoutStrategy,
-        Log.isVerbose(), this.pitConfig);
+        Log.isVerbose(), this.pitConfig, this.dontStopAtMutantKilled);
 
     final ProcessArgs args = ProcessArgs.withClassPath(this.classPath)
         .andLaunchOptions(this.config.getLaunchOptions())

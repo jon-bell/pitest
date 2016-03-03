@@ -30,17 +30,19 @@ public class MinionArguments {
   final TimeoutLengthStrategy       timeoutStrategy;
   final boolean                     verbose;
   final Configuration               pitConfig;
+  final boolean dontStopAtMutantKilled;
 
   public MinionArguments(final Collection<MutationDetails> mutations,
       final Collection<ClassName> tests, final MutationEngine engine,
       final TimeoutLengthStrategy timeoutStrategy, final boolean verbose,
-      final Configuration pitConfig) {
+      final Configuration pitConfig, final boolean dontStopAtMutantKilled) {
     this.mutations = mutations;
     this.testClasses = tests;
     this.engine = engine;
     this.timeoutStrategy = timeoutStrategy;
     this.verbose = verbose;
     this.pitConfig = pitConfig;
+    this.dontStopAtMutantKilled = dontStopAtMutantKilled;
   }
 
   public boolean isVerbose() {

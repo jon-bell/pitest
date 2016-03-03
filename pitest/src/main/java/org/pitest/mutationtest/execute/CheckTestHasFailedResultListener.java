@@ -14,6 +14,8 @@
  */
 package org.pitest.mutationtest.execute;
 
+import java.util.LinkedList;
+
 import org.pitest.functional.Option;
 import org.pitest.mutationtest.DetectionStatus;
 import org.pitest.testapi.Description;
@@ -23,11 +25,18 @@ import org.pitest.testapi.TestResult;
 public class CheckTestHasFailedResultListener implements TestListener {
 
   private Option<Description> lastFailingTest = Option.none();
+  private LinkedList<String> allFailingTests = null;
   private int                 testsRun        = 0;
 
   @Override
   public void onTestFailure(final TestResult tr) {
+    if (lastFailingTest.hasSome() && allFailingTests == null) {
+      allFailingTests = new LinkedList<String>();
+      allFailingTests.add(this.lastFailingTest.value().getQualifiedName());
+    }
     this.lastFailingTest = Option.some(tr.getDescription());
+    if(allFailingTests != null)
+      this.allFailingTests.add(tr.getDescription().getQualifiedName());
   }
 
   @Override
@@ -56,7 +65,10 @@ public class CheckTestHasFailedResultListener implements TestListener {
   public Option<Description> lastFailingTest() {
     return this.lastFailingTest;
   }
-
+  
+  public LinkedList<String> allFailingTests() {
+	  return allFailingTests;
+  }
   public int getNumberOfTestsRun() {
     return this.testsRun;
   }

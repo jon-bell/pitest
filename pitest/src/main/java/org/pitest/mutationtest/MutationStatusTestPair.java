@@ -14,6 +14,8 @@
  */
 package org.pitest.mutationtest;
 
+import java.util.LinkedList;
+
 import org.pitest.functional.Option;
 
 public final class MutationStatusTestPair {
@@ -21,17 +23,27 @@ public final class MutationStatusTestPair {
   private final int             numberOfTestsRun;
   private final DetectionStatus status;
   private final Option<String>  killingTest;
-
+  private final LinkedList<String> allKillingTests;
+  private final boolean            includeAllFailedTests;
+  
   public MutationStatusTestPair(final int numberOfTestsRun,
       final DetectionStatus status) {
-    this(numberOfTestsRun, status, null);
+    this(numberOfTestsRun, status, null,null,false);
   }
+  public MutationStatusTestPair(final int numberOfTestsRun,
+	      final DetectionStatus status, final String killingTest) {
+		this(numberOfTestsRun, status, killingTest, null,false);
+	  }
 
   public MutationStatusTestPair(final int numberOfTestsRun,
-      final DetectionStatus status, final String killingTest) {
+      final DetectionStatus status, final String killingTest,
+      final LinkedList<String> allKillingTests,
+      final boolean includeAllKilledTests) {
     this.status = status;
     this.killingTest = Option.some(killingTest);
     this.numberOfTestsRun = numberOfTestsRun;
+    this.allKillingTests = allKillingTests;
+    this.includeAllFailedTests = includeAllKilledTests;
   }
 
   public DetectionStatus getStatus() {
@@ -39,8 +51,22 @@ public final class MutationStatusTestPair {
   }
 
   public Option<String> getKillingTest() {
-    return this.killingTest;
+    if (includeAllFailedTests && allKillingTests != null
+        && allKillingTests.size() > 0) {
+      StringBuilder sb = new StringBuilder();
+      for (String s : allKillingTests) {
+        sb.append(s);
+        sb.append(",");
+      }
+      sb.deleteCharAt(sb.length() - 1);
+      return Option.some(sb.toString());
+    } else
+      return this.killingTest;
   }
+
+  public LinkedList<String> getAllKillingTests() {
+	return allKillingTests;
+}
 
   public int getNumberOfTestsRun() {
     return this.numberOfTestsRun;

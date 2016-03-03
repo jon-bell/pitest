@@ -14,6 +14,8 @@
  */
 package org.pitest.mutationtest;
 
+import java.util.LinkedList;
+
 import org.pitest.functional.Option;
 import org.pitest.mutationtest.engine.MutationDetails;
 
@@ -36,6 +38,10 @@ public final class MutationResult {
     return this.status.getKillingTest();
   }
 
+  public LinkedList<String> getAllKillingTests() {
+	return this.status.getAllKillingTests();
+  }
+  
   public DetectionStatus getStatus() {
     return this.status.getStatus();
   }

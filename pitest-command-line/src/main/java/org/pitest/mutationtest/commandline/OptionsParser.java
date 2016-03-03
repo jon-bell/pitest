@@ -114,6 +114,8 @@ public class OptionsParser {
 
   private final ArgumentAcceptingOptionSpec<Boolean> includeLaunchClasspathSpec;
 
+  private final ArgumentAcceptingOptionSpec<Boolean> dontStopAtMutantKilled;
+  
   public OptionsParser(Predicate<String> dependencyFilter) {
 
     this.dependencyFilter = dependencyFilter;
@@ -292,10 +294,14 @@ public class OptionsParser {
     this.javaExecutable = parserAccepts(JVM_PATH).withRequiredArg()
         .ofType(String.class).describedAs("path to java executable");
 
+
     this.pluginPropertiesSpec = parserAccepts(PLUGIN_CONFIGURATION)
         .withRequiredArg().ofType(KeyValuePair.class)
         .describedAs("custom plugin properties");
 
+    this.dontStopAtMutantKilled = parserAccepts(ConfigOption.DONT_STOP_WHEN_MUTANT_KILLED)
+            .withOptionalArg().ofType(Boolean.class).defaultsTo(false)
+            .describedAs("Should we stop running tests against a mutant after finding a test that kills it?");
   }
 
   private OptionSpecBuilder parserAccepts(final ConfigOption option) {
@@ -379,6 +385,9 @@ public class OptionsParser {
     setTestGroups(userArgs, data);
     data.setJavaExecutable(this.javaExecutable.value(userArgs));
 
+    data.setDontStopAtMutantKilled(userArgs.has(this.dontStopAtMutantKilled)
+    	&& this.dontStopAtMutantKilled.value(userArgs));
+    
     if (userArgs.has("?")) {
       return new ParseResult(data, "See above for supported parameters.");
     } else {

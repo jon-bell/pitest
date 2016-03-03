@@ -60,13 +60,21 @@ public class MutationTestWorker {
   private final Mutater                                     mutater;
   private final ClassLoader                                 loader;
   private final F3<ClassName, ClassLoader, byte[], Boolean> hotswap;
+  private final boolean dontStopAtMutantKilled;
 
   public MutationTestWorker(
       final F3<ClassName, ClassLoader, byte[], Boolean> hotswap,
       final Mutater mutater, final ClassLoader loader) {
+    this(hotswap, mutater, loader, false);
+  }
+
+  public MutationTestWorker(
+      final F3<ClassName, ClassLoader, byte[], Boolean> hotswap,
+      final Mutater mutater, final ClassLoader loader, boolean dontStopAtMutantKilled) {
     this.loader = loader;
     this.mutater = mutater;
     this.hotswap = hotswap;
+    this.dontStopAtMutantKilled = dontStopAtMutantKilled;
   }
 
   protected void run(final Collection<MutationDetails> range, final Reporter r,
@@ -144,7 +152,7 @@ public class MutationTestWorker {
     }
 
     final ClassLoader activeloader = pickClassLoaderForMutant(mutationId);
-    final Container c = createNewContainer(activeloader);
+    final Container c = createNewContainer(activeloader, dontStopAtMutantKilled);
     final long t0 = System.currentTimeMillis();
     if (this.hotswap.apply(mutationId.getClassName(), activeloader,
         mutatedClass.getBytes())) {
@@ -161,14 +169,23 @@ public class MutationTestWorker {
     return mutationDetected;
   }
 
-  private static Container createNewContainer(final ClassLoader activeloader) {
+  private static Container createNewContainer(final ClassLoader activeloader, final boolean dontStopAtMutantKilled) {
     final Container c = new UnContainer() {
       @Override
       public List<TestResult> execute(final TestUnit group) {
         List<TestResult> results = new ArrayList<TestResult>();
-        final ExitingResultCollector rc = new ExitingResultCollector(
-            new ConcreteResultCollector(results));
-        group.execute(activeloader, rc);
+        if(dontStopAtMutantKilled)
+        {
+        	final ConcreteResultCollector rc = 
+    	            new ConcreteResultCollector(results);
+    	        group.execute(activeloader, rc);
+        }
+        else
+        {
+	        final ExitingResultCollector rc = new ExitingResultCollector(
+	            new ConcreteResultCollector(results));
+	        group.execute(activeloader, rc);
+        }
         return results;
       }
     };
@@ -213,7 +230,7 @@ public class MutationTestWorker {
     if (listener.lastFailingTest().hasSome()) {
       return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
           listener.status(), listener.lastFailingTest().value()
-              .getQualifiedName());
+              .getQualifiedName(), listener.allFailingTests(), dontStopAtMutantKilled);
     } else {
       return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
           listener.status());
