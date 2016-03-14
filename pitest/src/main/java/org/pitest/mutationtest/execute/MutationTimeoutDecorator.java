@@ -14,6 +14,7 @@
  */
 package org.pitest.mutationtest.execute;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +26,9 @@ import org.pitest.mutationtest.TimeoutLengthStrategy;
 import org.pitest.testapi.ResultCollector;
 import org.pitest.testapi.TestUnit;
 import org.pitest.util.Unchecked;
+
+import de.unisb.cs.st.javaslicer.tracer.Tracer;
+import edu.columbia.cs.psl.testprof.TracerConnector;
 
 public final class MutationTimeoutDecorator extends TestUnitDecorator {
 
@@ -43,12 +47,22 @@ public final class MutationTimeoutDecorator extends TestUnitDecorator {
 
   @Override
   public void execute(final ClassLoader loader, final ResultCollector rc) {
-
+    if(Tracer.isAvailable())
+    {
+        String logName = TracerConnector.allMutations.size() +"."+this.getDescription().getName();
+        Tracer.getInstance().writeOutAndStartFresh(logName);
+    }
     final long maxTime = this.timeOutStrategy
         .getAllowedTime(this.executionTime);
 
     final FutureTask<?> future = createFutureForChildTestUnit(loader, rc);
     executeFutureWithTimeOut(maxTime, future, rc);
+    try {
+        if(Tracer.isAvailable())
+            Tracer.getInstance().finish();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
     if (!future.isDone()) {
       this.timeOutSideEffect.apply();
     }
