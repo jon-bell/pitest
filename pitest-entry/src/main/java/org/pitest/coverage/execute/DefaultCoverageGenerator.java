@@ -87,7 +87,15 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
           this.code));
 
       this.timings.registerStart(Timings.Stage.COVERAGE);
-      gatherCoverageData(tests, coverage);
+      if (System.getenv("PIT_RERUN_FRESH_JVM") == null)
+        gatherCoverageData(tests, coverage);
+      else {
+        for (int i = 0; i < 10; i++) {
+          for (ClassInfo c : tests) {
+            gatherCoverageData(Collections.singleton(c), coverage);
+          }
+        }
+      }
       this.timings.registerEnd(Timings.Stage.COVERAGE);
 
       final long time = (System.currentTimeMillis() - t0) / 1000;
@@ -117,6 +125,8 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
   }
 
   private List<String> duplicateTestsForCoverage(List<String> tests) {
+    if(System.getenv("PIT_RERUN_SAME_JVM") == null)
+      return tests;
     LinkedList<String> ret = new LinkedList<>();
     for (String t : tests) {
       for (int i = 0; i < 10; i++) {
