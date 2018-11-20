@@ -53,7 +53,7 @@ public class CoverageData implements CoverageDatabase {
   // We calculate block coverage, but everything currently runs on line
   // coverage. Ugly mess of maps below should go when
   // api changed to work via blocks
-  private final Map<BlockLocation, Map<String, TestInfo>>             blockCoverage;
+  private final Map<InstructionLocation, Map<String, TestInfo>> instructionCoverage;
   private final Map<BlockLocation, Set<Integer>>              blocksToLines = new LinkedHashMap<>();
   private final Map<ClassName, Map<ClassLine, Set<TestInfo>>> lineCoverage  = new LinkedHashMap<>();
   private final Map<String, Collection<ClassInfo>>            classesForFile;
@@ -65,15 +65,15 @@ public class CoverageData implements CoverageDatabase {
   private final List<Description>                             failingTestDescriptions = new ArrayList<>();
 
   public CoverageData(final CodeSource code, final LineMap lm) {
-    this(code, lm, new LinkedHashMap<BlockLocation, Set<TestInfo>>());
+    this(code, lm, new LinkedHashMap<InstructionLocation, Set<TestInfo>>());
   }
 
 
-  public CoverageData(final CodeSource code, final LineMap lm, Map<BlockLocation, Set<TestInfo>> blockCoverage) {
-    this.blockCoverage = new HashMap<>();
-    for (Entry<BlockLocation, Set<TestInfo>> e : blockCoverage.entrySet()) {
+  public CoverageData(final CodeSource code, final LineMap lm, Map<InstructionLocation, Set<TestInfo>> instructionCoverage) {
+    this.instructionCoverage = new HashMap<>();
+    for (Entry<InstructionLocation, Set<TestInfo>> e : instructionCoverage.entrySet()) {
       HashMap<String, TestInfo> tmp = new HashMap<>();
-      this.blockCoverage.put(e.getKey(), tmp);
+      this.instructionCoverage.put(e.getKey(), tmp);
       for (TestInfo i : e.getValue()) {
         tmp.put(i.toString(), i);
       }
@@ -82,6 +82,12 @@ public class CoverageData implements CoverageDatabase {
     this.lm = lm;
     this.classesForFile = FCollection.bucket(this.code.getCode(),
         keyFromClassInfo());
+  }
+
+  @Override
+  public Collection<TestInfo> getTestsForInstructionLocation(
+      InstructionLocation location) {
+    return this.instructionCoverage.get(location).values();
   }
 
   @Override
@@ -121,7 +127,7 @@ public class CoverageData implements CoverageDatabase {
   public Collection<TestInfo> getTestsForClass(final ClassName clazz) {
     final Set<TestInfo> tis = new TreeSet<>(
         new TestInfoNameComparator());
-    tis.addAll(this.blockCoverage.entrySet().stream().filter(isFor(clazz))
+    tis.addAll(this.instructionCoverage.entrySet().stream().filter(isFor(clazz))
         .flatMap(toTests())
         .collect(Collectors.toList())
         );
@@ -168,15 +174,18 @@ public class CoverageData implements CoverageDatabase {
     if(!cr.isGreenTest())
       failedTests.add(ti.getName());
     for (final BlockLocation each : cr.getCoverage()) {
-      addTestsToBlockMap(ti, each);
+      for (int i = each.getFirstInsnInBlock();
+           i <= each.getLastInsnInBlock(); i++) {
+        addTestsToBlockMap(ti, new InstructionLocation(each, i));
+      }
     }
   }
 
-  private void addTestsToBlockMap(final TestInfo ti, BlockLocation each) {
-    Map<String, TestInfo> tests = this.blockCoverage.get(each);
+  private void addTestsToBlockMap(final TestInfo ti, InstructionLocation each) {
+    Map<String, TestInfo> tests = this.instructionCoverage.get(each);
     if (tests == null) {
       tests = new TreeMap<>();
-      this.blockCoverage.put(each, tests);
+      this.instructionCoverage.put(each, tests);
     }
     TestInfo existing = tests.get(ti.getName());
     if (existing != null) {
@@ -197,11 +206,11 @@ public class CoverageData implements CoverageDatabase {
   }
 
   public List<BlockCoverage> createCoverage() {
-    return FCollection.map(this.blockCoverage.entrySet(), toBlockCoverage());
+    return FCollection.map(this.instructionCoverage.entrySet(), toBlockCoverage());
   }
 
-  private static Function<Entry<BlockLocation, Map<String, TestInfo>>, BlockCoverage> toBlockCoverage() {
-    return a -> new BlockCoverage(a.getKey(), a.getValue().values());
+  private static Function<Entry<InstructionLocation, Map<String, TestInfo>>, BlockCoverage> toBlockCoverage() {
+    return a -> new BlockCoverage(a.getKey().getBlockLocation(), a.getValue().values());
   }
 
   @Override
@@ -311,25 +320,25 @@ public class CoverageData implements CoverageDatabase {
       return map;
     }
 
-    return convertBlockCoverageToLineCoverageForClass(clazz);
+    return convertInstructionCoverageToLineCoverageForClass(clazz);
 
   }
 
-  private Map<ClassLine, Set<TestInfo>> convertBlockCoverageToLineCoverageForClass(
+  private Map<ClassLine, Set<TestInfo>> convertInstructionCoverageToLineCoverageForClass(
       ClassName clazz) {
-    final List<Entry<BlockLocation, Map<String, TestInfo>>> tests = FCollection.filter(
-        this.blockCoverage.entrySet(), isFor(clazz));
+    final List<Entry<InstructionLocation, Map<String, TestInfo>>> tests = FCollection.filter(
+        this.instructionCoverage.entrySet(), isFor(clazz));
 
     final Map<ClassLine, Set<TestInfo>> linesToTests = new LinkedHashMap<>(
         0);
 
-    for (final Entry<BlockLocation, Map<String, TestInfo>> each : tests) {
-      for (final int line : getLinesForBlock(each.getKey())) {
+    for (final Entry<InstructionLocation, Map<String, TestInfo>> each : tests) {
+      for (final int line : getLinesForBlock(each.getKey().getBlockLocation())) {
         final Set<TestInfo> tis = getLineTestSet(clazz, linesToTests, each, line, failedTests);
-        for(final Entry<String, TestInfo> notEach : each.getValue().entrySet())
-        {
-          if(!failedTests.contains(notEach.getKey()))
+        for (final Entry<String, TestInfo> notEach : each.getValue().entrySet()) {
+          if (!failedTests.contains(notEach.getKey())) {
             tis.add(notEach.getValue());
+          }
         }
       }
     }
@@ -340,7 +349,7 @@ public class CoverageData implements CoverageDatabase {
 
   private static Set<TestInfo> getLineTestSet(ClassName clazz,
       Map<ClassLine, Set<TestInfo>> linesToTests,
-      Entry<BlockLocation, Map<String, TestInfo>> each, int line,
+      Entry<InstructionLocation, Map<String, TestInfo>> each, int line,
       HashSet<String> failedTests) {
     final ClassLine cl = new ClassLine(clazz, line);
     Set<TestInfo> tis = linesToTests.get(cl);
@@ -373,14 +382,15 @@ public class CoverageData implements CoverageDatabase {
     this.failingTestDescriptions.add(testDescription);
   }
 
-  private Function<Entry<BlockLocation, Map<String,TestInfo>>, Stream<TestInfo>> toTests() {
+  private Function<Entry<InstructionLocation, Map<String,TestInfo>>, Stream<TestInfo>> toTests() {
     return a -> a.getValue().values().stream().filter(isFailed());
   }
+
   private Predicate<TestInfo> isFailed(){
     return a -> !failedTests.contains(a.getName());
   }
 
-  private Predicate<Entry<BlockLocation, Map<String, TestInfo>>> isFor(
+  private Predicate<Entry<InstructionLocation, Map<String, TestInfo>>> isFor(
       final ClassName clazz) {
     return a -> a.getKey().isFor(clazz);
   }
