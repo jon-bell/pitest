@@ -29,7 +29,8 @@ public final class MutationStatusTestPair implements Serializable {
   private final HashMap<String, Integer> timesSeen = new HashMap<>();
 
   public static MutationStatusTestPair notAnalysed(int testsRun, DetectionStatus status) {
-    return new MutationStatusTestPair(testsRun, status, Collections.emptyList(), Collections.emptyList());
+    return new MutationStatusTestPair(testsRun, status, Collections.emptyList(), Collections.emptyList(),
+      Collections.emptyList());
   }
 
   public MutationStatusTestPair(final int numberOfTestsRun,

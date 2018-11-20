@@ -17,6 +17,7 @@ package org.pitest.mutationtest.engine.gregor;
 import java.util.Map;
 
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.pitest.bytecode.ASMVersion;
 import org.pitest.mutationtest.engine.MutationIdentifier;
 
