@@ -87,6 +87,9 @@ public class CoverageData implements CoverageDatabase {
   @Override
   public Collection<TestInfo> getTestsForInstructionLocation(
       InstructionLocation location) {
+    if (this.instructionCoverage.get(location) == null) {
+      return null;
+    }
     return this.instructionCoverage.get(location).values();
   }
 
