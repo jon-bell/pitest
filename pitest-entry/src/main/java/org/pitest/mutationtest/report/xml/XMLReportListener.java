@@ -14,23 +14,11 @@
  */
 package org.pitest.mutationtest.report.xml;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import org.pitest.mutationtest.ClassMutationResults;
-import org.pitest.mutationtest.MutationResult;
-import org.pitest.mutationtest.MutationResultListener;
-import org.pitest.mutationtest.engine.MutationDetails;
-import org.pitest.util.ResultOutputStrategy;
-import org.pitest.util.StringUtil;
-import org.pitest.util.Unchecked;
-
-import static org.pitest.mutationtest.report.xml.Tag.block;
 import static org.pitest.mutationtest.report.xml.Tag.coveringTests;
 import static org.pitest.mutationtest.report.xml.Tag.description;
+import static org.pitest.mutationtest.report.xml.Tag.firstBlock;
 import static org.pitest.mutationtest.report.xml.Tag.index;
+import static org.pitest.mutationtest.report.xml.Tag.indexes;
 import static org.pitest.mutationtest.report.xml.Tag.killingTest;
 import static org.pitest.mutationtest.report.xml.Tag.killingTests;
 import static org.pitest.mutationtest.report.xml.Tag.lineNumber;
@@ -42,8 +30,22 @@ import static org.pitest.mutationtest.report.xml.Tag.mutator;
 import static org.pitest.mutationtest.report.xml.Tag.sourceFile;
 import static org.pitest.mutationtest.report.xml.Tag.succeedingTests;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.pitest.mutationtest.ClassMutationResults;
+import org.pitest.mutationtest.MutationResult;
+import org.pitest.mutationtest.MutationResultListener;
+import org.pitest.mutationtest.engine.MutationDetails;
+import org.pitest.util.ResultOutputStrategy;
+import org.pitest.util.StringUtil;
+import org.pitest.util.Unchecked;
+
 enum Tag {
-  mutation, sourceFile, mutatedClass, mutatedMethod, methodDescription, lineNumber, mutator, index, killingTest, killingTests, coveringTests, succeedingTests, description, block;
+  mutation, sourceFile, mutatedClass, mutatedMethod, methodDescription, lineNumber, mutator, index, killingTest, killingTests, coveringTests, succeedingTests, description, firstBlock, indexes;
 }
 
 public class XMLReportListener implements MutationResultListener {
@@ -88,8 +90,8 @@ public class XMLReportListener implements MutationResultListener {
             methodDescription)
         + makeNode("" + details.getLineNumber(), lineNumber)
         + makeNode(clean(details.getMutator()), mutator)
-        + makeNode("" + details.getFirstIndex(), index)
-        + makeNode("" + details.getBlock(), block)
+        + makeNode(makeListMinusOne(details.getId().getIndexes(),index), indexes)
+        + makeNode("" + details.getBlock(), firstBlock)
         + makeNodeWhenConditionSatisfied(!fullMutationMatrix,
             createKillingTestDesc(mutation.getKillingTest()), killingTest)
         + makeNodeWhenConditionSatisfied(fullMutationMatrix,
@@ -103,6 +105,14 @@ public class XMLReportListener implements MutationResultListener {
 
   private String clean(final String value) {
     return StringUtil.escapeBasicHtmlChars(value);
+  }
+
+  private String makeListMinusOne(final Iterable<Integer> i, final Tag tag) {
+    StringBuilder sb = new StringBuilder();
+    for (int each : i) {
+      sb.append(makeNode("" + (each - 1), tag));
+    }
+    return sb.toString();
   }
 
   private String makeNode(final String value, final String attributes,

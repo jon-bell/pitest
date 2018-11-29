@@ -1,14 +1,22 @@
 package org.pitest.coverage.export;
 
-import org.pitest.coverage.*;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import org.pitest.coverage.BlockCoverage;
+import org.pitest.coverage.CoverageData;
+import org.pitest.coverage.CoverageExporter;
+import org.pitest.coverage.CoverageSummary;
+import org.pitest.coverage.TestInfo;
 import org.pitest.mutationtest.engine.Location;
 import org.pitest.util.ResultOutputStrategy;
 import org.pitest.util.StringUtil;
 import org.pitest.util.Unchecked;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.util.*;
 
 /**
  * Quick and dirty export of coverage data into XML
@@ -57,6 +65,12 @@ public class DefaultCoverageExporter implements CoverageExporter {
             + "' firstInstruction='" + each.getBlock().getFirstInsnInBlock()
             + "' lastInstruction='" + each.getBlock().getLastInsnInBlock()
             + "'>");
+    write(out, "<lines>");
+
+    for (Integer i : lines) {
+      write(out, "<line>" + i + "</line>");
+    }
+    write(out, "</lines>");
     write(out, "<tests>\n");
     final List<TestInfo> ts = new ArrayList<>(each.getTests());
     Collections.sort(ts,(o1, o2) -> o1.getName().compareTo(o2.getName()));

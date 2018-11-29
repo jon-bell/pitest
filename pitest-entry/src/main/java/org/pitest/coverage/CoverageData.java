@@ -209,7 +209,15 @@ public class CoverageData implements CoverageDatabase {
   }
 
   public List<BlockCoverage> createCoverage() {
-    return FCollection.map(this.instructionCoverage.entrySet(), toBlockCoverage());
+    final List<BlockCoverage> ret = new ArrayList<>();
+    final HashSet<BlockLocation> visited = new HashSet<>();
+    for (Entry<InstructionLocation, Map<String, TestInfo>> each : this.instructionCoverage
+        .entrySet()) {
+      if (visited.add(each.getKey().getBlockLocation())) {
+        ret.add(toBlockCoverage().apply(each));
+      }
+    }
+    return ret;
   }
 
   private static Function<Entry<InstructionLocation, Map<String, TestInfo>>, BlockCoverage> toBlockCoverage() {
