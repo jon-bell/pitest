@@ -14,6 +14,11 @@
  */
 package org.pitest.mutationtest.build;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.logging.Logger;
+
 import org.pitest.classinfo.ClassName;
 import org.pitest.mutationtest.DetectionStatus;
 import org.pitest.mutationtest.MutationMetaData;
@@ -22,10 +27,6 @@ import org.pitest.mutationtest.engine.MutationDetails;
 import org.pitest.mutationtest.execute.MutationTestProcess;
 import org.pitest.util.ExitCode;
 import org.pitest.util.Log;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.logging.Logger;
 
 public class MutationTestUnit implements MutationAnalysisUnit {
 
@@ -91,18 +92,18 @@ public class MutationTestUnit implements MutationAnalysisUnit {
         boolean haveWork = false;
         for (MutationDetails d : remainingMutations) {
           if (d.getTestsInOrder().size() > 0) {
+            worker = this.workerFactory
+                .createWorker(Collections.singletonList(d), this.testClasses);
+            worker.start();
+
+            exitCode = waitForMinionToDie(worker);
+            worker.results(mutations);
             haveWork = true;
-            break;
           }
         }
         if (!haveWork)
           break;
-        worker = this.workerFactory
-            .createWorker(remainingMutations, this.testClasses);
-        worker.start();
 
-        exitCode = waitForMinionToDie(worker);
-        worker.results(mutations);
       }
     }
     correctResultForProcessExitCode(mutations, exitCode);
