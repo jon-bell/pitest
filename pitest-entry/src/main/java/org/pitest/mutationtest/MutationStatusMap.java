@@ -39,7 +39,7 @@ public class MutationStatusMap {
       final MutationStatusTestPair status) {
     if (this.mutationMap.containsKey(mutation) && this.mutationMap.get(mutation).getStatus() == DetectionStatus.NOT_TRIED_FULLY) {
       MutationStatusTestPair existing = this.mutationMap.get(mutation);
-      existing.accumulate(status);
+      existing.accumulate(status, true);
     } else {
       //Update status
       status.checkForNotFullyTried();

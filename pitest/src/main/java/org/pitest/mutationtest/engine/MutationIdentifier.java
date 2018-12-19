@@ -48,6 +48,8 @@ public final class MutationIdentifier implements Comparable<MutationIdentifier>,
    */
   private final String        mutator;
 
+  public int uniq;
+
   public MutationIdentifier(final Location location, final int index,
       final String mutatorUniqueId) {
     this(location, Collections.singleton(index), mutatorUniqueId);
@@ -134,6 +136,7 @@ public final class MutationIdentifier implements Comparable<MutationIdentifier>,
         + ((this.location == null) ? 0 : this.location.hashCode());
     result = (prime * result)
         + ((this.mutator == null) ? 0 : this.mutator.hashCode());
+    result = (prime * result) + this.uniq;
     return result;
   }
 
@@ -170,6 +173,8 @@ public final class MutationIdentifier implements Comparable<MutationIdentifier>,
     } else if (!this.mutator.equals(other.mutator)) {
       return false;
     }
+    if(this.uniq != other.uniq)
+      return false;
     return true;
   }
 

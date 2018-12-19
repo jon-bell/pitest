@@ -20,10 +20,13 @@ import java.util.Collections;
 import java.util.logging.Logger;
 
 import org.pitest.classinfo.ClassName;
+import org.pitest.coverage.TestInfo;
 import org.pitest.mutationtest.DetectionStatus;
 import org.pitest.mutationtest.MutationMetaData;
 import org.pitest.mutationtest.MutationStatusMap;
+import org.pitest.mutationtest.MutationStatusTestPair;
 import org.pitest.mutationtest.engine.MutationDetails;
+import org.pitest.mutationtest.engine.MutationIdentifier;
 import org.pitest.mutationtest.execute.MutationTestProcess;
 import org.pitest.util.ExitCode;
 import org.pitest.util.Log;
@@ -86,20 +89,38 @@ public class MutationTestUnit implements MutationAnalysisUnit {
     ExitCode exitCode = waitForMinionToDie(worker);
     worker.results(mutations);
 
+    int k = 1;
     if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
       for (int i = 1; i < 10; i++) {
         remainingMutations = mutations.getUnCoveredMutations();
         boolean haveWork = false;
         for (MutationDetails d : remainingMutations) {
+          MutationStatusTestPair result = null;
           if (d.getTestsInOrder().size() > 0) {
-            worker = this.workerFactory
-                .createWorker(Collections.singletonList(d), this.testClasses);
-            worker.start();
+            for (TestInfo t : d.getTestsInOrder()) {
+              MutationDetails justThisOneTest = new MutationDetails(new MutationIdentifier(d.getId().getLocation(), d.getId().getIndexes(),d.getMutator()),
+                  d.getFilename(), d.getDescription(), d.getLineNumber(),
+                  d.getBlock());
+              justThisOneTest.getId().uniq = k;
+              k++;
+              justThisOneTest.addTestsInOrder(Collections.singletonList(t));
+              worker = this.workerFactory
+                  .createWorker(Collections.singletonList(justThisOneTest), this.testClasses);
+              worker.start();
 
-            exitCode = waitForMinionToDie(worker);
-            worker.results(mutations);
-            haveWork = true;
+              exitCode = waitForMinionToDie(worker);
+              MutationStatusTestPair r = worker.results(justThisOneTest);
+              if (result == null)
+                result = r;
+              else
+                result.accumulate(r, false);
+              haveWork = true;
+            }
           }
+          if (result != null) {
+            mutations.setStatusForMutation(d, result);
+          }
+
         }
         if (!haveWork)
           break;

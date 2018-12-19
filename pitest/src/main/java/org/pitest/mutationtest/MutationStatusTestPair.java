@@ -206,16 +206,23 @@ public final class MutationStatusTestPair implements Serializable {
 
   }
 
-  public void accumulate(MutationStatusTestPair status) {
+  public void accumulate(MutationStatusTestPair status, boolean incrementTestNumber) {
 
     HashSet<String> allTests = new HashSet<>(status.getKillingTests());
     allTests.addAll(status.getSucceedingTests());
     allTests.addAll(status.getCoveringTests());
-    HashMap<String,String> map = renameTests(allTests);
+    if(incrementTestNumber) {
+      HashMap<String, String> map = renameTests(allTests);
 
-    this.killingTests.addAll(remapTests(status.getKillingTests(), map));
-    this.succeedingTests.addAll(remapTests(status.getSucceedingTests(), map));
-    this.coveringTests.addAll(remapTests(status.getCoveringTests(), map));
+      this.killingTests.addAll(remapTests(status.getKillingTests(), map));
+      this.succeedingTests.addAll(remapTests(status.getSucceedingTests(), map));
+      this.coveringTests.addAll(remapTests(status.getCoveringTests(), map));
+    }
+    else {
+      this.killingTests.addAll(status.getKillingTests());
+      this.succeedingTests.addAll(status.getSucceedingTests());
+      this.coveringTests.addAll(status.getCoveringTests());
+    }
     this.numberOfTestsRun+=status.getNumberOfTestsRun();
 
     this.status = status.status;
