@@ -109,7 +109,7 @@ public class MutationTestUnit implements MutationAnalysisUnit {
     System.out.println("KP_NormalEnd: " + dumpUncoveredStatistics(mutations.getUnCoveredMutations()));
 
     if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
-      for (int i = 1; i < 5; i++) {
+      for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 10 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
 
         remainingMutations = mutations.getUnCoveredMutations();
         Collections.shuffle(remainingMutations, new Random(i));
@@ -133,7 +133,7 @@ public class MutationTestUnit implements MutationAnalysisUnit {
     //AND shuffle the order of mutants
     //AND shuffle the order of tests
     if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
-      for (int i = 1; i < 5; i++) {
+      for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 10 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
         remainingMutations = mutations.getUnCoveredMutations();
         Collections.shuffle(remainingMutations, new Random(i));
         System.out.println(
@@ -166,7 +166,7 @@ public class MutationTestUnit implements MutationAnalysisUnit {
     //AND shuffle the order of tests
     int k = 1;
     if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
-      for (int i = 1; i < 5; i++) {
+      for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 10 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
         remainingMutations = mutations.getUnCoveredMutations();
         System.out.println(
             "KP_RerunVeryHeavy" + i + "Start: " + dumpUncoveredStatistics(
