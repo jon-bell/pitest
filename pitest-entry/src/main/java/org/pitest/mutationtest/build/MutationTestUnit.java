@@ -17,6 +17,8 @@ package org.pitest.mutationtest.build;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import org.pitest.classinfo.ClassName;
@@ -73,12 +75,28 @@ public class MutationTestUnit implements MutationAnalysisUnit {
     }
   }
 
+  private String dumpUncoveredStatistics(List<MutationDetails> mutants){
+   int nMutants = 0;
+   int nMutantTestPairs = 0;
+   for(MutationDetails d : mutants)
+   {
+     if(d.getTestsInOrder().size() > 0)
+     {
+       nMutants++;
+       nMutantTestPairs += d.getTestsInOrder().size();
+     }
+   }
+    return "NotCovered: " + nMutants + " mutants, " + nMutantTestPairs + " pairs";
+  }
   private void runTestInSeperateProcessForMutationRange(
       final MutationStatusMap mutations) throws IOException,
       InterruptedException {
 
-    Collection<MutationDetails> remainingMutations = mutations
+
+    //First, run all mutants normally
+    List<MutationDetails> remainingMutations = mutations
         .getUnrunMutations();
+    System.out.println("KP_NormalStart: " + dumpUncoveredStatistics(remainingMutations));
     MutationTestProcess worker = this.workerFactory.createWorker(
         remainingMutations, this.testClasses);
     worker.start();
@@ -88,15 +106,56 @@ public class MutationTestUnit implements MutationAnalysisUnit {
 
     ExitCode exitCode = waitForMinionToDie(worker);
     worker.results(mutations);
+    System.out.println("KP_NormalEnd: " + dumpUncoveredStatistics(remainingMutations));
 
+    //Second, for only uncovered test/mutants: try to run with each mutant in its own JVM, but all tests against that mutant in the same JVM
+    //AND shuffle the order of mutants
+    //AND shuffle the order of tests
+    if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
+      for (int i = 1; i < 5; i++) {
+        remainingMutations = mutations.getUnCoveredMutations();
+        Collections.shuffle(remainingMutations, new Random(i));
+        System.out.println(
+            "KP_RerunLight" + i + "Start: " + dumpUncoveredStatistics(
+                remainingMutations));
+        boolean haveWork = false;
+        for (MutationDetails d : remainingMutations) {
+          if (d.getTestsInOrder().size() > 0) {
+            Collections.shuffle(d.getTestsInOrder(), new Random(i));
+            worker = this.workerFactory
+                .createWorker(Collections.singletonList(d), this.testClasses);
+            worker.start();
+
+            exitCode = waitForMinionToDie(worker);
+            worker.results(mutations);
+            haveWork = true;
+          }
+        }
+        System.out.println(
+            "KP_RerunLight" + i + "End: " + dumpUncoveredStatistics(
+                remainingMutations));
+        if (!haveWork)
+          break;
+
+      }
+    }
+
+    //Last, for test-mutants still uncovered, try to run with each test-mutant pair in its own JVM
+    //AND shuffle the order of mutants
+    //AND shuffle the order of tests
     int k = 1;
     if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
-      for (int i = 1; i < 10; i++) {
+      for (int i = 1; i < 5; i++) {
         remainingMutations = mutations.getUnCoveredMutations();
+        System.out.println(
+            "KP_RerunHeavy" + i + "Start: " + dumpUncoveredStatistics(
+                remainingMutations));
+        Collections.shuffle(remainingMutations, new Random(i+5));
         boolean haveWork = false;
         for (MutationDetails d : remainingMutations) {
           MutationStatusTestPair result = null;
           if (d.getTestsInOrder().size() > 0) {
+            Collections.shuffle(d.getTestsInOrder(), new Random(i + 5));
             for (TestInfo t : d.getTestsInOrder()) {
               MutationDetails justThisOneTest = new MutationDetails(new MutationIdentifier(d.getId().getLocation(), d.getId().getIndexes(),d.getMutator()),
                   d.getFilename(), d.getDescription(), d.getLineNumber(),
@@ -122,6 +181,9 @@ public class MutationTestUnit implements MutationAnalysisUnit {
           }
 
         }
+        System.out.println(
+            "KP_RerunHeavy" + i + "End: " + dumpUncoveredStatistics(
+                remainingMutations));
         if (!haveWork)
           break;
 

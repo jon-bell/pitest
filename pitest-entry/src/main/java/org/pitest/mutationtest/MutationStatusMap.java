@@ -63,14 +63,14 @@ public class MutationStatusMap {
     return !getUnrunMutations().isEmpty();
   }
 
-  public Collection<MutationDetails> getUnrunMutations() {
+  public List<MutationDetails> getUnrunMutations() {
     return this.mutationMap.entrySet().stream()
         .filter(hasStatus(DetectionStatus.NOT_STARTED))
         .map(toMutationDetails())
         .collect(Collectors.toList());
   }
 
-  public Collection<MutationDetails> getUnCoveredMutations() {
+  public List<MutationDetails> getUnCoveredMutations() {
     List<MutationDetails> toRun = new LinkedList<>();
     for (Entry<MutationDetails, MutationStatusTestPair> each : this.mutationMap
         .entrySet()) {
