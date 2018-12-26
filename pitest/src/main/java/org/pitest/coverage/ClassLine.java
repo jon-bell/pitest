@@ -15,9 +15,13 @@
 
 package org.pitest.coverage;
 
+import java.io.Serializable;
+
 import org.pitest.classinfo.ClassName;
 
-public final class ClassLine {
+public final class ClassLine implements Serializable {
+
+  private static final long serialVersionUID = 3709847650077616384L;
   private final ClassName clazz;
   private final int       lineNumber;
 

@@ -1,6 +1,8 @@
 package org.pitest.classinfo;
 
-public interface HashFunction {
+import java.io.Serializable;
+
+public interface HashFunction extends Serializable {
 
   long hash(byte[] value);
 

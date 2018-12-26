@@ -14,6 +14,7 @@
  */
 package org.pitest.classinfo;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -26,9 +27,10 @@ import org.objectweb.asm.Opcodes;
 import org.pitest.functional.FCollection;
 import java.util.Optional;
 
-public class ClassInfo {
+public class ClassInfo implements Serializable {
 
-  private final ClassIdentifier        id;
+  private static final long serialVersionUID = 280941546051171615L;
+  private final ClassIdentifier id;
 
   private final int                    access;
   private final Set<Integer>           codeLines;

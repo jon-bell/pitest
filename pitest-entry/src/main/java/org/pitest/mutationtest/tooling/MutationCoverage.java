@@ -15,7 +15,11 @@
 package org.pitest.mutationtest.tooling;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,9 +37,12 @@ import org.pitest.classinfo.HierarchicalClassId;
 import org.pitest.classpath.ClassPathByteArraySource;
 import org.pitest.classpath.ClassloaderByteArraySource;
 import org.pitest.classpath.CodeSource;
+import org.pitest.coverage.CoverageData;
 import org.pitest.coverage.CoverageDatabase;
 import org.pitest.coverage.CoverageGenerator;
 import org.pitest.coverage.TestInfo;
+import org.pitest.coverage.analysis.LineMapper;
+import org.pitest.coverage.execute.DefaultCoverageGenerator;
 import org.pitest.functional.FCollection;
 import org.pitest.help.Help;
 import org.pitest.help.PitHelpError;
@@ -112,7 +119,42 @@ public class MutationCoverage {
 
     checkExcludedRunners();
 
-    final CoverageDatabase coverageData = coverage().calculateCoverage();
+    CoverageDatabase coverageData = null;
+    String covFile = System.getenv("KP_PIT_COVERAGE_FILE");
+    if (covFile != null) {
+      File f = new File(covFile);
+      if (f.exists()) {
+        try {
+          ObjectInputStream ois = new ObjectInputStream(
+              new FileInputStream(covFile));
+          CoverageData cd = (CoverageData) ois.readObject();
+
+          cd.setCode(((DefaultCoverageGenerator) coverage()).getCode());
+          cd.setLm(new LineMapper(((DefaultCoverageGenerator) coverage()).getCode()));
+          coverageData = cd;
+          ois.close();
+          LOG.fine("Succeeded in re-using cached coverage data, " + f);
+        } catch (IOException | ClassNotFoundException ex) {
+          ex.printStackTrace();
+          coverageData = coverage().calculateCoverage();
+        }
+      }
+      else
+      {
+        coverageData = coverage().calculateCoverage();
+        try {
+          ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(covFile));
+          oos.writeObject(coverageData);
+          LOG.fine("Succeeded in caching generated coverage data, " + f);
+        } catch (IOException ex) {
+          ex.printStackTrace();
+          coverageData = coverage().calculateCoverage();
+        }
+      }
+    }
+    else {
+      coverageData = coverage().calculateCoverage();
+    }
 
     LOG.fine("Used memory after coverage calculation "
         + ((runtime.totalMemory() - runtime.freeMemory()) / MB) + " mb");

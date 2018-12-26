@@ -1,5 +1,6 @@
 package org.pitest.classpath;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +24,7 @@ import org.pitest.functional.Streams;
  */
 public class CodeSource implements ClassInfoSource {
 
-  private final ProjectClassPaths   classPath;
+  private final ProjectClassPaths classPath;
   private final Repository          classRepository;
 
   public CodeSource(final ProjectClassPaths classPath) {

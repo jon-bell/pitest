@@ -1,8 +1,11 @@
 package org.pitest.coverage;
 
+import java.io.Serializable;
+
 import org.pitest.classinfo.ClassName;
 
-public final class InstructionLocation {
+public final class InstructionLocation implements Serializable  {
+  private static final long   serialVersionUID = 8961447458921578224L;
   private final BlockLocation blockLocation;
   private final int           instructionIndex;
 

@@ -16,6 +16,7 @@
 package org.pitest.coverage;
 
 import java.io.FileWriter;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,10 +46,12 @@ import org.pitest.functional.FCollection;
 import org.pitest.testapi.Description;
 import org.pitest.util.Log;
 
-public class CoverageData implements CoverageDatabase {
+public class CoverageData implements CoverageDatabase, Serializable {
 
-  private static final Logger                                 LOG           = Log
+
+  private static final Logger LOG              = Log
       .getLogger();
+  private static final long   serialVersionUID = 3125192005418727605L;
 
   // We calculate block coverage, but everything currently runs on line
   // coverage. Ugly mess of maps below should go when
@@ -58,9 +61,9 @@ public class CoverageData implements CoverageDatabase {
   private final Map<ClassName, Map<ClassLine, Set<TestInfo>>> lineCoverage  = new LinkedHashMap<>();
   private final Map<String, Collection<ClassInfo>>            classesForFile;
 
-  private final CodeSource                                    code;
+  private transient CodeSource                                    code;
 
-  private final LineMap                                       lm;
+  private transient LineMap                                       lm;
 
   private final List<Description>                             failingTestDescriptions = new ArrayList<>();
 
@@ -68,6 +71,13 @@ public class CoverageData implements CoverageDatabase {
     this(code, lm, new LinkedHashMap<InstructionLocation, Set<TestInfo>>());
   }
 
+  public void setCode(CodeSource code) {
+    this.code = code;
+  }
+
+  public void setLm(LineMap lm) {
+    this.lm = lm;
+  }
 
   public CoverageData(final CodeSource code, final LineMap lm, Map<InstructionLocation, Set<TestInfo>> instructionCoverage) {
     this.instructionCoverage = new HashMap<>();

@@ -14,14 +14,16 @@
  */
 package org.pitest.classinfo;
 
+import java.io.Serializable;
 import java.util.Optional;
 
-interface ClassPointer {
+interface ClassPointer extends Serializable {
   Optional<ClassInfo> fetch();
 }
 
 class DefaultClassPointer implements ClassPointer {
 
+  private static final long serialVersionUID = 3585923497867107754L;
   private final ClassInfo clazz;
 
   DefaultClassPointer(final ClassInfo clazz) {
@@ -36,6 +38,7 @@ class DefaultClassPointer implements ClassPointer {
 }
 
 class DeferredClassPointer implements ClassPointer {
+  private static final long serialVersionUID = 7608609178356940179L;
   private final Repository repository;
   private final ClassName  name;
 

@@ -14,6 +14,7 @@
  */
 package org.pitest.classinfo;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -21,12 +22,13 @@ import java.util.Set;
 
 import java.util.Optional;
 
-public class Repository implements ClassInfoSource {
+public class Repository implements ClassInfoSource, Serializable {
 
-  private final HashFunction              hashFunction;
+  private static final long serialVersionUID = 1495359557751747325L;
+  private final HashFunction hashFunction;
   private final Map<ClassName, ClassInfo> knownClasses   = new HashMap<>();
   private final Set<ClassName>            unknownClasses = new HashSet<>();
-  private final ClassByteArraySource      source;
+  private transient final ClassByteArraySource      source;
 
   public Repository(final ClassByteArraySource source) {
     this(source, new AddlerHash());

@@ -62,6 +62,10 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
   private final CoverageExporter exporter;
   private final boolean          showProgress;
 
+  public CodeSource getCode() {
+    return code;
+  }
+
   public DefaultCoverageGenerator(final File workingDir,
       final CoverageOptions coverageOptions, final LaunchOptions launchOptions,
       final CodeSource code, final CoverageExporter exporter,

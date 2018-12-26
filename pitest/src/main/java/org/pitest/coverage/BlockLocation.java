@@ -1,10 +1,13 @@
 package org.pitest.coverage;
 
+import java.io.Serializable;
+
 import org.pitest.classinfo.ClassName;
 import org.pitest.mutationtest.engine.Location;
 
-public final class BlockLocation {
+public final class BlockLocation implements Serializable {
 
+  private static final long serialVersionUID = 2470385869705387285L;
   private final Location location;
   private final int      block;
   private final int      firstInsnInBlock;
