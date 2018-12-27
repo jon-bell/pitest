@@ -357,6 +357,7 @@ public class MutationCoverageReportSystemTest extends ReportTestBase {
 
   @Test
   public void shouldKillMutationsWhenKillingTestClassContainsAnIgnoreOnAnotherMethod() {
+    this.data.setVerbose(true);
     setMutators("RETURN_VALS");
 
     this.data

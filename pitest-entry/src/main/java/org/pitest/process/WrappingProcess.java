@@ -8,6 +8,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +29,14 @@ public class WrappingProcess {
     this.port = port;
     this.processArgs = args;
     this.minionClass = minionClass;
+
+    if(System.getenv("VMVM_JAR") != null)
+    {
+      List<String> jvmArgs = new LinkedList<>(this.processArgs.getJvmArgs());
+      jvmArgs.add("-Xbootclasspath/p:"+ System.getenv("VMVM_JAR"));
+      jvmArgs.add("-javaagent:"+System.getenv("VMVM_JAR")+"=org/pitest");
+      this.processArgs.setJvmArgs(jvmArgs);
+    }
   }
 
   public void start() throws IOException {
