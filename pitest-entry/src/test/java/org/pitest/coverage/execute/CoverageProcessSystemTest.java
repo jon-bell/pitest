@@ -18,6 +18,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.example.coverage.execute.samples.dependencies.DependentTestee;
+import com.example.coverage.execute.samples.dependencies.Test1;
+import com.example.coverage.execute.samples.dependencies.Test2;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.pitest.SystemTest;
@@ -206,6 +209,20 @@ public class CoverageProcessSystemTest {
   }
 
   @Test
+  public void shouldCalculateCoverageForAllRelevantClassesWithDependencies()
+      throws IOException, InterruptedException, ExecutionException {
+    ArrayList<String> tests =new ArrayList<>();
+    tests.add(Test1.class.getName());
+    tests.add(Test2.class.getName());
+
+    ArrayList<CoverageResult> coveredClasses = new ArrayList<>();
+    runCoverageProcess(tests, coveredClasses);
+
+    assertThat(coveredClasses).anyMatch(coverageFor(DependentTestee.class));
+    assertThat(coveredClasses).anyMatch(coverageFor(DependentTestee.class));
+  }
+
+  @Test
   public void shouldCalculateCoverageForSmallMethodThatThrowsException()
       throws IOException, InterruptedException, ExecutionException {
     final List<CoverageResult> coveredClasses = runCoverageForTest(TestsClassWithException.class);
@@ -362,6 +379,31 @@ public class CoverageProcessSystemTest {
       agent.close();
     }
   }
+
+  private void runCoverageProcess(final List<String> testNames,
+      final List<CoverageResult> coveredClasses) throws IOException,
+      InterruptedException {
+    final SideEffect1<CoverageResult> handler = a -> coveredClasses.add(a);
+
+    final CoverageOptions sa = new CoverageOptions(coverOnlyTestees(), excludeTests(), TestPluginArguments.defaults(), true, -1);
+
+    final JarCreatingJarFinder agent = new JarCreatingJarFinder();
+    try {
+      final LaunchOptions lo = new LaunchOptions(agent);
+      final SocketFinder sf = new SocketFinder();
+      final CoverageProcess process = new CoverageProcess(ProcessArgs
+          .withClassPath(new ClassPath()).andLaunchOptions(lo), sa,
+          sf.getNextAvailableServerSocket(), testNames,
+          handler);
+      process.start();
+
+      final ExitCode exitCode = process.waitToDie();
+      assertEquals(ExitCode.OK, exitCode);
+    } finally {
+      agent.close();
+    }
+  }
+
 
   private Predicate<CoverageResult> coverageFor(final Class<?> class1) {
     return new Predicate<CoverageResult>() {

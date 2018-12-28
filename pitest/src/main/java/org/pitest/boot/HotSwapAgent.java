@@ -19,6 +19,8 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 
+import edu.columbia.cs.psl.vmvm.runtime.Reinitializer;
+
 public class HotSwapAgent {
 
   private static Instrumentation instrumentation;

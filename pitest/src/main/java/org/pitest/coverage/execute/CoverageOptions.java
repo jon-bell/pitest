@@ -70,7 +70,9 @@ public class CoverageOptions implements Serializable {
         glob("sun/*"),
         glob("org/pitest/coverage/*"),
         glob("org/pitest/reloc/*"),
-        glob("org/pitest/boot/*"));
+        glob("org/pitest/boot/*"),
+        glob("edu/columbia/cs/psl/vmvm/*"),
+        glob("**VMVM**"));
   }
 
   private static Glob glob(String match) {

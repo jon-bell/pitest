@@ -81,6 +81,7 @@ public class CoverageMinion {
       HotSwapAgent.addTransformer(new CoverageTransformer(
           convertToJVMClassFilter(paramsFromParent.getFilter())));
 
+
       final List<TestUnit> tus = getTestsFromParent(dis, paramsFromParent);
 
       LOG.info(tus.size() + " tests received");

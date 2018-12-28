@@ -18,6 +18,7 @@ package org.pitest.testapi.execute.containers;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.columbia.cs.psl.vmvm.runtime.Reinitializer;
 import org.pitest.testapi.TestResult;
 import org.pitest.testapi.TestUnit;
 import org.pitest.testapi.execute.Container;
@@ -26,6 +27,8 @@ public class UnContainer implements Container {
 
   @Override
   public List<TestResult> execute(final TestUnit group) {
+    if(System.getenv("VMVM_JAR") != null)
+      Reinitializer.markAllClassesForReinit();
     final List<TestResult> results = new ArrayList<>(12);
     final ConcreteResultCollector rc = new ConcreteResultCollector(results);
     group.execute(rc);
