@@ -204,7 +204,7 @@ public class MutationTestUnit implements MutationAnalysisUnit {
         }
         System.out.println(
             "KP_RerunVeryHeavy" + i + "End: " + dumpUncoveredStatistics(
-                remainingMutations));
+                mutations.getUnCoveredMutations()));
         if (!haveWork)
           break;
 
