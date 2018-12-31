@@ -198,7 +198,7 @@ public final class MutationStatusTestPair implements Serializable {
     allTests.addAll(getCoveringTests());
     HashMap<String,String> map = renameTests(allTests);
     allTests.removeAll(getCoveringTests());
-    if (allTests.size() > 0 && runCount < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))))
+    if (allTests.size() > 0 && runCount < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT")) * 3))
     {
       //Still not done yet, this test is not determined
       this.status = DetectionStatus.NOT_TRIED_FULLY;
@@ -228,7 +228,7 @@ public final class MutationStatusTestPair implements Serializable {
     this.status = status.status;
 
     allTests.removeAll(status.getCoveringTests());
-    if (allTests.size() > 0 && runCount < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))))
+    if (allTests.size() > 0 && runCount < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT")) * 3))
     {
       //Still not done yet, this test is not determined
       this.status = DetectionStatus.NOT_TRIED_FULLY;
