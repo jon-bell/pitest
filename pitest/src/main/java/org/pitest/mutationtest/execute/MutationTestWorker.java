@@ -190,8 +190,8 @@ public class MutationTestWorker {
       List<String> allCoveringTests = new ArrayList<String>();
 
       // Determine what tests can be saved and which need to be rerun
-      // NOTE: Run up to the specified number of times (10 by default)
-      for (int count = 0; count < (System.getenv("PIT_RERUN_COUNT") == null ? 10 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); count++) {
+      // NOTE: Run up to the specified number of times (5 by default)
+      for (int count = 0; count < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); count++) {
         MutationStatusTestPair pair = doTestsDetectMutation(c, tests);
         // Exit early if found some status without knowledge of tests...
         if (pair.getStatus() == DetectionStatus.TIMED_OUT

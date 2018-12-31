@@ -96,7 +96,7 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
         gatherCoverageData(tests, coverage);
       else {
         //If running in fresh JVM's, call gatherCoverageData N times
-        for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 10 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
+        for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
           if (System.getenv("PIT_COV_RANDOMIZE") != null) {
             Collections.shuffle((List<ClassInfo>)tests);
           }
@@ -140,7 +140,7 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
     //If running in new JVMs, then duplicate each test
     LinkedList<String> ret = new LinkedList<>();
     for (String t : tests) {
-      for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 10 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
+      for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
         ret.add(t);
       }
     }
