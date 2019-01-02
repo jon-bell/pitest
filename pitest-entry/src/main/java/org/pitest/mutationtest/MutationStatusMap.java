@@ -71,6 +71,13 @@ public class MutationStatusMap {
   }
 
   public List<MutationDetails> getUnCoveredMutations() {
+    return this.mutationMap.entrySet().stream()
+        .filter(hasNotCoveredStatus())
+        .map(toMutationDetails())
+        .collect(Collectors.toList());
+  }
+
+  public List<MutationDetails> getUnFinishedMutations() {
     List<MutationDetails> toRun = new LinkedList<>();
     for (Entry<MutationDetails, MutationStatusTestPair> each : this.mutationMap
         .entrySet()) {
@@ -78,8 +85,9 @@ public class MutationStatusMap {
       HashSet<String> testsThatCovered = toBaseTestName(each.getValue().getCoveringTests());
       for(TestInfo i : each.getKey().getTestsInOrder())
       {
-        if(!testsThatCovered.contains(i.getName()))
+        if(!testsThatCovered.contains(i.getName())) {
           newTestsInOrder.add(i);
+        }
       }
       each.getKey().getTestsInOrder().clear();;
       each.getKey().getTestsInOrder().addAll(newTestsInOrder);
@@ -123,7 +131,9 @@ public class MutationStatusMap {
   }
   private static Predicate<Entry<MutationDetails, MutationStatusTestPair>> hasNotCoveredStatus() {
     return a -> a.getValue().getStatus().equals(DetectionStatus.KILLED_NOT_COVERED) ||
-        a.getValue().getStatus().equals(DetectionStatus.SURVIVED_NOT_COVERED);
+        a.getValue().getStatus().equals(DetectionStatus.SURVIVED_NOT_COVERED) ||
+        a.getValue().getStatus().equals(DetectionStatus.UNKNOWN_WEIRD) ||
+        a.getValue().getStatus().equals(DetectionStatus.NOT_TRIED_FULLY);
   }
 
   public void markUncoveredMutations() {

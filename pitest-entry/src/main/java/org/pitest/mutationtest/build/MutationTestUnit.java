@@ -111,11 +111,11 @@ public class MutationTestUnit implements MutationAnalysisUnit {
     if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
       for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
 
-        remainingMutations = mutations.getUnCoveredMutations();
+        remainingMutations = mutations.getUnFinishedMutations();
         Collections.shuffle(remainingMutations, new Random(i));
         System.out.println(
             "KP_RerunLight" + i + "Start: " + dumpUncoveredStatistics(
-                remainingMutations));
+                mutations.getUnCoveredMutations()));
         worker = this.workerFactory.createWorker(
             remainingMutations, this.testClasses);
         worker.start();
@@ -125,7 +125,7 @@ public class MutationTestUnit implements MutationAnalysisUnit {
         System.out.println(
             "KP_RerunLight" + i + "End: " + dumpUncoveredStatistics(
                 mutations.getUnCoveredMutations()));
-        if(mutations.getUnCoveredMutations().size() == 0)
+        if(mutations.getUnFinishedMutations().size() == 0)
           break;
       }
     }
@@ -134,11 +134,11 @@ public class MutationTestUnit implements MutationAnalysisUnit {
     //AND shuffle the order of tests
     if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
       for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
-        remainingMutations = mutations.getUnCoveredMutations();
+        remainingMutations = mutations.getUnFinishedMutations();
         Collections.shuffle(remainingMutations, new Random(i));
         System.out.println(
             "KP_RerunHeavy" + i + "Start: " + dumpUncoveredStatistics(
-                remainingMutations));
+                mutations.getUnCoveredMutations()));
         boolean haveWork = false;
         for (MutationDetails d : remainingMutations) {
           if (d.getTestsInOrder().size() > 0) {
@@ -167,10 +167,10 @@ public class MutationTestUnit implements MutationAnalysisUnit {
     int k = 1;
     if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
       for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
-        remainingMutations = mutations.getUnCoveredMutations();
+        remainingMutations = mutations.getUnFinishedMutations();
         System.out.println(
             "KP_RerunVeryHeavy" + i + "Start: " + dumpUncoveredStatistics(
-                remainingMutations));
+                mutations.getUnCoveredMutations()));
         Collections.shuffle(remainingMutations, new Random(i+5));
         boolean haveWork = false;
         for (MutationDetails d : remainingMutations) {
