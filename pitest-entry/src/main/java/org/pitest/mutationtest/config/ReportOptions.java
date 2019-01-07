@@ -138,6 +138,8 @@ public class ReportOptions {
   
   private boolean                        useClasspathJar;
 
+  private boolean                        runMutations                   = true;
+
 
   public boolean isVerbose() {
     return this.verbose;
@@ -617,6 +619,14 @@ public class ReportOptions {
     this.useClasspathJar = useClasspathJar;
   }
 
+  public boolean shouldRunMutations() {
+    return this.runMutations;
+  }
+
+  public void setRunMutations(boolean runMutations) {
+    this.runMutations = runMutations;
+  }
+
   @Override
   public String toString() {
     return "ReportOptions [targetClasses=" + targetClasses
@@ -644,7 +654,8 @@ public class ReportOptions {
         + properties + ", maxSurvivors=" + maxSurvivors + ", excludedRunners="
         + excludedRunners + ", includedTestMethods=" + includedTestMethods
         + ", testPlugin=" + testPlugin + ", useClasspathJar=" + useClasspathJar
-        + ", skipFailingTests=" + skipFailingTests + "]";
+        + ", skipFailingTests=" + skipFailingTests
+        + ", runMutations=" + runMutations + "]";
   }
 
   

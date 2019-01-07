@@ -150,6 +150,8 @@ public class MojoToReportOptionsConverter {
 
     data.setSkipFailingTests(this.mojo.skipFailingTests());
 
+    data.setRunMutations(this.mojo.isRunMutations());
+
     return data;
   }
 

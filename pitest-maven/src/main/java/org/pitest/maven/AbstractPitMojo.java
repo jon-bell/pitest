@@ -369,6 +369,12 @@ public class AbstractPitMojo extends AbstractMojo {
   @Parameter(property = "useClasspathJar", defaultValue = "false")
   private boolean                     useClasspathJar;
 
+  /**
+   * Indicate if want to run mutations or not
+   */
+  @Parameter(property = "runMutations", defaultValue = "true")
+  private boolean                     runMutations;
+
   protected final GoalStrategy        goalStrategy;
 
   public AbstractPitMojo() {
@@ -687,6 +693,10 @@ public class AbstractPitMojo extends AbstractMojo {
    
   public boolean isUseClasspathJar() {
     return this.useClasspathJar;
+  }
+
+  public boolean isRunMutations() {
+    return this.runMutations;
   }
 
   static class RunDecision {
