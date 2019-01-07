@@ -92,11 +92,11 @@ public class MutationTestUnit implements MutationAnalysisUnit {
       final MutationStatusMap mutations) throws IOException,
       InterruptedException {
 
-
     //First, run all mutants normally
     List<MutationDetails> remainingMutations = mutations
         .getUnrunMutations();
     System.out.println("KP_NormalStart: " + dumpUncoveredStatistics(remainingMutations));
+    Long start = System.currentTimeMillis();
     MutationTestProcess worker = this.workerFactory.createWorker(
         remainingMutations, this.testClasses);
     worker.start();
@@ -106,7 +106,9 @@ public class MutationTestUnit implements MutationAnalysisUnit {
 
     ExitCode exitCode = waitForMinionToDie(worker);
     worker.results(mutations);
+    Long end = System.currentTimeMillis();
     System.out.println("KP_NormalEnd: " + dumpUncoveredStatistics(mutations.getUnCoveredMutations()));
+    System.out.println("KP_NormalTime: " + (end - start));
 
     if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
       for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {
@@ -116,15 +118,18 @@ public class MutationTestUnit implements MutationAnalysisUnit {
         System.out.println(
             "KP_RerunLight" + i + "Start: " + dumpUncoveredStatistics(
                 mutations.getUnCoveredMutations()));
+        start = System.currentTimeMillis();
         worker = this.workerFactory.createWorker(
             remainingMutations, this.testClasses);
         worker.start();
 
         exitCode = waitForMinionToDie(worker);
         worker.results(mutations);
+        end = System.currentTimeMillis();
         System.out.println(
             "KP_RerunLight" + i + "End: " + dumpUncoveredStatistics(
                 mutations.getUnCoveredMutations()));
+        System.out.println("KP_RerunLight" + i + "Time: " + (end - start));
         if(mutations.getUnFinishedMutations().size() == 0)
           break;
       }
@@ -139,6 +144,7 @@ public class MutationTestUnit implements MutationAnalysisUnit {
         System.out.println(
             "KP_RerunHeavy" + i + "Start: " + dumpUncoveredStatistics(
                 mutations.getUnCoveredMutations()));
+        start = System.currentTimeMillis();
         boolean haveWork = false;
         for (MutationDetails d : remainingMutations) {
           if (d.getTestsInOrder().size() > 0) {
@@ -152,9 +158,11 @@ public class MutationTestUnit implements MutationAnalysisUnit {
             haveWork = true;
           }
         }
+        end = System.currentTimeMillis();
         System.out.println(
             "KP_RerunHeavy" + i + "End: " + dumpUncoveredStatistics(
                 mutations.getUnCoveredMutations()));
+        System.out.println("KP_RerunHeavy" + i + "Time: " + (end - start));
         if (!haveWork)
           break;
 
@@ -171,6 +179,7 @@ public class MutationTestUnit implements MutationAnalysisUnit {
         System.out.println(
             "KP_RerunVeryHeavy" + i + "Start: " + dumpUncoveredStatistics(
                 mutations.getUnCoveredMutations()));
+        start = System.currentTimeMillis();
         Collections.shuffle(remainingMutations, new Random(i+5));
         boolean haveWork = false;
         for (MutationDetails d : remainingMutations) {
@@ -202,9 +211,11 @@ public class MutationTestUnit implements MutationAnalysisUnit {
           }
 
         }
+        end = System.currentTimeMillis();
         System.out.println(
             "KP_RerunVeryHeavy" + i + "End: " + dumpUncoveredStatistics(
                 mutations.getUnCoveredMutations()));
+        System.out.println("KP_RerunVeryHeavy" + i + "Time: " + (end - start));
         if (!haveWork)
           break;
 
