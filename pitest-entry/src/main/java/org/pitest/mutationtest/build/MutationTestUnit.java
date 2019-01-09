@@ -17,6 +17,7 @@ package org.pitest.mutationtest.build;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -88,13 +89,33 @@ public class MutationTestUnit implements MutationAnalysisUnit {
    }
     return "NotCovered: " + nMutants + " mutants, " + nMutantTestPairs + " pairs";
   }
+
   private void runTestInSeperateProcessForMutationRange(
       final MutationStatusMap mutations) throws IOException,
       InterruptedException {
 
-    //First, run all mutants normally
     List<MutationDetails> remainingMutations = mutations
         .getUnrunMutations();
+
+    // If the option to not run any mutants (but report those that should be run), then set appropriately
+    if (System.getenv("PIT_NO_RUN_MUTANTS") != null) {
+        setFirstMutationToStatusOfStartedInCaseMinionFailsAtBoot(mutations,
+            remainingMutations);
+        // Set each mutation tests surviving to those that should be running on it
+        for (MutationDetails mut : remainingMutations) {
+            // Convert tests in order to strings
+            List<String> tests = new LinkedList<String>();
+            for (TestInfo ti : mut.getTestsInOrder()) {
+                tests.add(ti.getName());
+            }
+            mutations.setStatusForMutation(mut, new MutationStatusTestPair(0, DetectionStatus.STARTED,
+                    new LinkedList<String>(), tests, new LinkedList<String>()));
+        }
+        correctResultForProcessExitCode(mutations, ExitCode.OK);
+        return;
+    }
+
+    //First, run all mutants normally
     System.out.println("KP_NormalStart: " + dumpUncoveredStatistics(remainingMutations));
     Long start = System.currentTimeMillis();
     MutationTestProcess worker = this.workerFactory.createWorker(
