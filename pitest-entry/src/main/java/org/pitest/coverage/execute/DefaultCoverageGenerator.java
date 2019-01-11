@@ -92,7 +92,7 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
           this.code));
 
       this.timings.registerStart(Timings.Stage.COVERAGE);
-      if (System.getenv("PIT_RERUN_FRESH_JVM") == null)
+      if (System.getenv("PIT_COV_RERUN_FRESH_JVM") == null)
         gatherCoverageData(tests, coverage);
       else {
         //If running in fresh JVM's, call gatherCoverageData N times
@@ -134,7 +134,7 @@ public class DefaultCoverageGenerator implements CoverageGenerator {
   }
 
   private List<String> duplicateTestsForCoverage(List<String> tests) {
-    if(System.getenv("PIT_RERUN_SAME_JVM") == null)
+    if(System.getenv("PIT_COV_RERUN_SAME_JVM") == null)
       return tests;
 
     //If running in new JVMs, then duplicate each test
