@@ -182,7 +182,7 @@ public class MutationStatisticsPrecursorTest {
                                     final int numberOfTests) {
     final MutationResult mr = new MutationResult(
             MutationTestResultMother.createDetails("foo.java"),
-            new MutationStatusTestPair(numberOfTests, status, "foo"));
+            new MutationStatusTestPair(numberOfTests, status, "foo", "FooException"));
     return mr;
   }
 

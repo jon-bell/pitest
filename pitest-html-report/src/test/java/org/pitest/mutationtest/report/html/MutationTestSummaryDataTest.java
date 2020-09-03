@@ -180,7 +180,7 @@ public class MutationTestSummaryDataTest {
   }
 
   private MutationResult aMutationResult(DetectionStatus status) {
-    return new MutationResult(null, new MutationStatusTestPair(1, status, "A test"));
+    return new MutationResult(null, new MutationStatusTestPair(1, status, "A test", "FooException"));
   }
 
   private MutationTestSummaryData buildSummaryDataMutators() {

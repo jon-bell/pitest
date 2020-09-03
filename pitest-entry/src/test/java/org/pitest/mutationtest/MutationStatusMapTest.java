@@ -77,13 +77,13 @@ public class MutationStatusMapTest {
   @Test
   public void shouldCreateResultsForAllMutations() {
     final MutationStatusTestPair statusPairOne = new MutationStatusTestPair(42,
-        DetectionStatus.KILLED, "foo");
+        DetectionStatus.KILLED, "foo", "FooException");
     final MutationResult resultOne = new MutationResult(this.details,
         statusPairOne);
     this.testee.setStatusForMutation(this.details, statusPairOne);
 
     final MutationStatusTestPair statusPairTwo = new MutationStatusTestPair(42,
-        DetectionStatus.RUN_ERROR, "bar");
+        DetectionStatus.RUN_ERROR, "bar", "FooException");
     final MutationResult resultTwo = new MutationResult(this.detailsTwo,
         statusPairTwo);
     this.testee.setStatusForMutation(this.detailsTwo, statusPairTwo);
@@ -101,13 +101,13 @@ public class MutationStatusMapTest {
     assertEquals(Collections.emptyList(), this.testee.getUnrunMutations());
 
     final MutationStatusTestPair statusPairOne = new MutationStatusTestPair(42,
-        DetectionStatus.NO_COVERAGE, "foo");
+        DetectionStatus.NO_COVERAGE, "foo", "FooException");
     final MutationResult resultOne = new MutationResult(this.details,
         statusPairOne);
     this.testee.setStatusForMutation(this.details, statusPairOne);
 
     final MutationStatusTestPair statusPairTwo = new MutationStatusTestPair(42,
-        DetectionStatus.NO_COVERAGE, "bar");
+        DetectionStatus.NO_COVERAGE, "bar", "FooException");
     final MutationResult resultTwo = new MutationResult(this.detailsTwo,
         statusPairTwo);
     this.testee.setStatusForMutation(this.detailsTwo, statusPairTwo);

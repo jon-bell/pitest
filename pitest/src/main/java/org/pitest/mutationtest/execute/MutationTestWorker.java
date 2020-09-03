@@ -201,11 +201,12 @@ public class MutationTestWorker {
       final CheckTestHasFailedResultListener listener) {
     List<String> failingTests = listener.getFailingTests().stream()
         .map(description -> description.getQualifiedName()).collect(Collectors.toList());
+    List<String> failingTestExceptions = listener.getFailingTestExceptions();
     List<String> succeedingTests = listener.getSucceedingTests().stream()
         .map(description -> description.getQualifiedName()).collect(Collectors.toList());
 
     return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
-        listener.status(), failingTests, succeedingTests);
+        listener.status(), failingTests, failingTestExceptions, succeedingTests);
   }
 
   private List<TestUnit> createEarlyExitTestGroup(final List<TestUnit> tests) {

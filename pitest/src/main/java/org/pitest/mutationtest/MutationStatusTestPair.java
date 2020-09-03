@@ -26,24 +26,28 @@ public final class MutationStatusTestPair implements Serializable {
 
   private final int             numberOfTestsRun;
   private final DetectionStatus status;
+  private final List<String>    killingExceptions;
   private final List<String>    killingTests;
   private final List<String>    succeedingTests;
 
   public static MutationStatusTestPair notAnalysed(int testsRun, DetectionStatus status) {
-    return new MutationStatusTestPair(testsRun, status, Collections.emptyList(), Collections.emptyList());
+    return new MutationStatusTestPair(testsRun, status, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
   }
 
   public MutationStatusTestPair(final int numberOfTestsRun,
-      final DetectionStatus status, final String killingTest) {
+      final DetectionStatus status, final String killingTest, final String killingException) {
     this(numberOfTestsRun, status, killingTestToList(killingTest),
+      killingTestToList(killingException),
       Collections.emptyList());
   }
 
   public MutationStatusTestPair(final int numberOfTestsRun,
       final DetectionStatus status, final List<String> killingTests,
+      final List<String> killingExceptions,
       final List<String> succeedingTests) {
     this.status = status;
     this.killingTests = killingTests;
+    this.killingExceptions = killingExceptions;
     this.succeedingTests = succeedingTests;
     this.numberOfTestsRun = numberOfTestsRun;
   }
@@ -76,6 +80,10 @@ public final class MutationStatusTestPair implements Serializable {
    */
   public List<String> getKillingTests() {
     return killingTests;
+  }
+
+  public List<String> getKillingExceptions() {
+    return killingExceptions;
   }
 
   /** Get all succeeding tests.

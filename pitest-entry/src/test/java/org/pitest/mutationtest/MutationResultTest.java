@@ -27,7 +27,7 @@ public class MutationResultTest {
   @Test
   public void shouldReturnNameOfKillingTestWhenKnown() {
     this.testee = new MutationResult(null, new MutationStatusTestPair(1,
-        DetectionStatus.KILLED, "good test"));
+        DetectionStatus.KILLED, "good test", "FooException"));
     assertEquals("good test", this.testee.getKillingTestDescription());
   }
 

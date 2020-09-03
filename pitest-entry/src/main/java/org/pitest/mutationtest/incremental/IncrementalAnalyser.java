@@ -94,6 +94,7 @@ public class IncrementalAnalyser implements MutationAnalyser {
                 each,
                 DetectionStatus.KILLED,
                 killingTestNames,
+                Collections.emptyList(), //TODO not supporting incremental mode for reporting exceptions
                 mutationStatusTestPair.getSucceedingTests());
       }
     }
@@ -132,15 +133,16 @@ public class IncrementalAnalyser implements MutationAnalyser {
 
   private MutationResult makeResult(final MutationDetails each,
       final DetectionStatus status) {
-    return makeResult(each, status, Collections.emptyList(), Collections.emptyList());
+    return makeResult(each, status, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
   }
 
   private MutationResult makeResult(final MutationDetails each,
       final DetectionStatus status, final List<String> killingTests,
+      final List<String> killingTestExceptions,
       final List<String> succeedingTests) {
     updatePreanalysedTotal(status);
     return new MutationResult(each, new MutationStatusTestPair(0, status,
-        killingTests, succeedingTests));
+        killingTests, killingTestExceptions, succeedingTests));
   }
 
   private void updatePreanalysedTotal(final DetectionStatus status) {

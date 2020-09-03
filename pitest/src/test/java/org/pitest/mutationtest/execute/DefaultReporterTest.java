@@ -43,7 +43,7 @@ public class DefaultReporterTest {
     final MutationIdentifier mi = aMutationId().withIndex(0).withMutator("foo")
         .build();
     final MutationStatusTestPair ms = new MutationStatusTestPair(2,
-        DetectionStatus.KILLED, "foo");
+        DetectionStatus.KILLED, "foo", "FooException");
     this.testee.report(mi, ms);
     final SafeDataInputStream is = resultToStream();
     assertEquals(Id.REPORT, is.readByte());

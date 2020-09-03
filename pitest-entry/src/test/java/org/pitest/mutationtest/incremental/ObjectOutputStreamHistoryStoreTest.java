@@ -95,7 +95,7 @@ public class ObjectOutputStreamHistoryStoreTest {
 
         final MutationResult mr = new MutationResult(
             MutationTestResultMother.createDetails("foo"),
-            new MutationStatusTestPair(1, DetectionStatus.KILLED, "testName"));
+            new MutationStatusTestPair(1, DetectionStatus.KILLED, "testName", "FooException"));
 
         this.testee.recordResult(mr);
 
@@ -127,7 +127,7 @@ public class ObjectOutputStreamHistoryStoreTest {
 
         final MutationResult mr = new MutationResult(
             MutationTestResultMother.createDetails("foo"),
-            new MutationStatusTestPair(1, DetectionStatus.KILLED, "testName"));
+            new MutationStatusTestPair(1, DetectionStatus.KILLED, "testName", "FooException"));
 
         this.testee.recordResult(mr);
         this.output.append("rubbish");

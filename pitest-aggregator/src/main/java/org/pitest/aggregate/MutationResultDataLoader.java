@@ -44,7 +44,7 @@ class MutationResultDataLoader extends DataLoader<MutationResult> {
         Integer.parseInt((String) map.get(LINE_NUMBER)), Integer.parseInt((String) map.get(BLOCK)));
 
     final MutationStatusTestPair status = new MutationStatusTestPair(Integer.parseInt((String) map.get(NUMBER_OF_TESTS_RUN)),
-        DetectionStatus.valueOf((String) map.get(STATUS)), (String) map.get(KILLING_TEST));
+        DetectionStatus.valueOf((String) map.get(STATUS)), (String) map.get(KILLING_TEST), null); //TODO killingException?
 
     return new MutationResult(md, status);
   }

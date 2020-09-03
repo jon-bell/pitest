@@ -42,6 +42,11 @@ public final class MutationResult {
     return this.status.getKillingTests();
   }
 
+  public List<String> getKillingExceptions() {
+    return this.status.getKillingExceptions();
+  }
+
+
   public List<String> getSucceedingTests() {
     return this.status.getSucceedingTests();
   }

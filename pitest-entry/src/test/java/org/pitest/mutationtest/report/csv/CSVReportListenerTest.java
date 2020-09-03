@@ -47,7 +47,7 @@ public class CSVReportListenerTest {
   public void shouldOutputKillingTestWhenOneFound() throws IOException {
     final MutationResult mr = new MutationResult(
         MutationTestResultMother.createDetails(), new MutationStatusTestPair(1,
-            DetectionStatus.KILLED, "foo"));
+            DetectionStatus.KILLED, "foo", "FooException"));
     this.testee.handleMutationResult(MutationTestResultMother
         .createClassResults(mr));
     final String expected = "file,clazz,mutator,method,42,KILLED,foo"

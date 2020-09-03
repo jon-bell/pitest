@@ -30,7 +30,7 @@ public class KnownStatusMutationTestUnitTest {
   public void shouldCreateMutationMetaDataForSuppliedResults() throws Exception {
     final MutationResult mr = new MutationResult(
         MutationTestResultMother.createDetails(), new MutationStatusTestPair(1,
-            DetectionStatus.KILLED, "foo"));
+            DetectionStatus.KILLED, "foo", "FooException"));
     final List<MutationResult> mutations = Arrays.asList(mr);
     this.testee = new KnownStatusMutationTestUnit(mutations);
     final MutationMetaData actual = this.testee.call();
