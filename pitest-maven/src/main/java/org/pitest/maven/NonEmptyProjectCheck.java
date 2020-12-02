@@ -12,7 +12,7 @@ public class NonEmptyProjectCheck implements Predicate<MavenProject> {
   @Override
   public boolean test(MavenProject project) {
     return FCollection.contains(project.getTestCompileSourceRoots(), exists()) 
-        && FCollection.contains(project.getCompileSourceRoots(), exists());
+        || FCollection.contains(project.getCompileSourceRoots(), exists());
   }
   
   private Predicate<String> exists() {
