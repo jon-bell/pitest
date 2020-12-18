@@ -64,7 +64,7 @@ public class GregorMutater implements Mutater {
     context.setTargetMutation(Optional.<MutationIdentifier> empty());
     Optional<byte[]> bytes = GregorMutater.this.byteSource.getBytes(
         classToMutate.asInternalName());
-    
+
     return bytes.map(findMutations(context))
         .orElse(Collections.<MutationDetails>emptyList());
 
@@ -84,6 +84,21 @@ public class GregorMutater implements Mutater {
         filterMethods(), this.mutators);
 
     first.accept(mca, ClassReader.EXPAND_FRAMES);
+    if (System.getenv("PIT_MUTANT") != null) {
+      String[] data = System.getenv("PIT_MUTANT").split(":");
+      String mutatedClass = data[0];
+      String mutatedMethod = data[1];
+      int index = Integer.valueOf(data[2]);
+      String mutator = data[3];
+      ArrayList<MutationDetails> ret = new ArrayList<>();
+      for (MutationDetails d : context.getCollectedMutations()) {
+        if (d.getClassName().asJavaName().equals(mutatedClass) && d.getMethod().name().equals(mutatedMethod)
+                && d.getFirstIndex() == index && d.getMutator().equals(mutator)) {
+          ret.add(d);
+        }
+      }
+      return ret;
+    }
 
     return new ArrayList<>(context.getCollectedMutations());
   }
