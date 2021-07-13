@@ -153,7 +153,7 @@ public class IncrementalAnalyserTest {
   private void setHistoryForAllMutationsTo(final DetectionStatus status,
       final String test) {
     when(this.history.getPreviousResult(any(MutationIdentifier.class)))
-    .thenReturn(Optional.ofNullable(new MutationStatusTestPair(0, status, test)));
+    .thenReturn(Optional.ofNullable(new MutationStatusTestPair(0, status, test, null)));
   }
 
 }

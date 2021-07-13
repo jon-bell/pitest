@@ -186,6 +186,7 @@ public class MutationTestWorker {
       List<String> allKillingAndCovering = new ArrayList<String>();
       List<String> allSucceedingAndCovering = new ArrayList<String>();
       List<String> allKilling = new ArrayList<>();
+      List<String> allKillingExceptions = new ArrayList<>();
       List<String> allSucceeding = new ArrayList<>();
       List<String> allCoveringTests = new ArrayList<String>();
 
@@ -216,6 +217,7 @@ public class MutationTestWorker {
         allSucceedingAndCovering.addAll(succeedingAndCoveringTests);
         allCoveringTests.addAll(pair.getCoveringTests());
         allKilling.addAll(pair.getKillingTests());
+        allKillingExceptions.addAll(pair.getKillingExceptions());
         allSucceeding.addAll(pair.getSucceedingTests());
 
         // If not full matrix and found that a test has actually killed the mutant, stop
@@ -252,7 +254,7 @@ public class MutationTestWorker {
         //Primarily: COVERED but SURVIVED, also has some NOT COVERED
         overallStatus = DetectionStatus.UNKNOWN_WEIRD;
       }
-      MutationStatusTestPair overallPair = new MutationStatusTestPair(numTotalRuns, overallStatus, allKilling, allSucceeding, allCoveringTests);
+      MutationStatusTestPair overallPair = new MutationStatusTestPair(numTotalRuns, overallStatus, allKilling, allKillingExceptions, allSucceeding, allCoveringTests);
 
       return overallPair;
     } catch (final Exception ex) {
@@ -266,7 +268,7 @@ public class MutationTestWorker {
       final CheckTestHasFailedResultListener listener = new CheckTestHasFailedResultListener(fullMutationMatrix);
 
       final Pitest pit = new Pitest(listener);
-      
+
       if (this.fullMutationMatrix) {
         pit.run(c, tests);
       } else {
@@ -288,9 +290,10 @@ public class MutationTestWorker {
         .map(description -> description.getQualifiedName()).collect(Collectors.toList());
     List<String> coveringTests = listener.getCoveringTests().stream()
             .map(description -> description.getQualifiedName()).collect(Collectors.toList());
+    List<String> failingTestExceptions = listener.getFailingTestExceptions();
 
     return new MutationStatusTestPair(listener.getNumberOfTestsRun(),
-        listener.status(), failingTests, succeedingTests, coveringTests);
+        listener.status(), failingTests, failingTestExceptions, succeedingTests, coveringTests);
   }
 
   private List<TestUnit> createEarlyExitTestGroup(final List<TestUnit> tests) {

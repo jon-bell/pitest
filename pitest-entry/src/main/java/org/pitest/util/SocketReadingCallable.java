@@ -25,6 +25,7 @@ class SocketReadingCallable implements Callable<ExitCode> {
 
   @Override
   public ExitCode call() throws Exception {
+      this.socket.setSoTimeout(10000); //Handle crashed minions
     try (Socket clientSocket = this.socket.accept()) {
       try (BufferedInputStream bif = new BufferedInputStream(
           clientSocket.getInputStream())) {

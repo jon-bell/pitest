@@ -14,14 +14,6 @@
  */
 package org.pitest.mutationtest.build;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-import java.util.logging.Logger;
-
 import org.pitest.classinfo.ClassName;
 import org.pitest.coverage.TestInfo;
 import org.pitest.mutationtest.DetectionStatus;
@@ -33,6 +25,11 @@ import org.pitest.mutationtest.engine.MutationIdentifier;
 import org.pitest.mutationtest.execute.MutationTestProcess;
 import org.pitest.util.ExitCode;
 import org.pitest.util.Log;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class MutationTestUnit implements MutationAnalysisUnit {
 
@@ -109,27 +106,57 @@ public class MutationTestUnit implements MutationAnalysisUnit {
                 tests.add(ti.getName());
             }
             mutations.setStatusForMutation(mut, new MutationStatusTestPair(0, DetectionStatus.STARTED,
-                    new LinkedList<String>(), tests, new LinkedList<String>()));
+                    new LinkedList<String>(), new LinkedList<String>(), tests, new LinkedList<String>()));
         }
         correctResultForProcessExitCode(mutations, ExitCode.OK);
         return;
     }
 
-    //First, run all mutants normally
-    System.out.println("KP_NormalStart: " + dumpUncoveredStatistics(remainingMutations));
-    Long start = System.currentTimeMillis();
-    MutationTestProcess worker = this.workerFactory.createWorker(
-        remainingMutations, this.testClasses);
-    worker.start();
 
-    setFirstMutationToStatusOfStartedInCaseMinionFailsAtBoot(mutations,
-        remainingMutations);
+    long start, end;
+    ExitCode exitCode = null;
+    MutationTestProcess worker;
+    if (System.getenv("PIT_RUN_MUTANT_FRESH_JVM") != null) {
+      //Try to run with each mutant in its own JVM, but all tests against that mutant in the same JVM
+      start = System.currentTimeMillis();
 
-    ExitCode exitCode = waitForMinionToDie(worker);
-    worker.results(mutations);
-    Long end = System.currentTimeMillis();
-    System.out.println("KP_NormalEnd: " + dumpUncoveredStatistics(mutations.getUnCoveredMutations()));
-    System.out.println("KP_NormalTime: " + (end - start));
+      int rerunCount = 5;
+      if(System.getenv("PIT_RERUN_COUNT") != null)
+        rerunCount = Integer.valueOf(System.getenv("PIT_RERUN_COUNT"));
+      for (MutationDetails d : remainingMutations) {
+        if (d.getTestsInOrder().size() > 0) {
+          //Collections.shuffle(d.getTestsInOrder(), new Random());
+          System.out.println("Running: " + d.getId());
+          for(int i = 0; i < rerunCount; i++) {
+            worker = this.workerFactory
+                    .createWorker(Collections.singletonList(d), this.testClasses);
+            worker.start();
+
+            exitCode = waitForMinionToDie(worker);
+            worker.results(mutations);
+          }
+        }else {
+          System.out.println("Skipping: " + d.getId());
+        }
+      }
+      end = System.currentTimeMillis();
+    } else {
+      //First, run all mutants normally
+      System.out.println("KP_NormalStart: " + dumpUncoveredStatistics(remainingMutations));
+      start = System.currentTimeMillis();
+      worker = this.workerFactory.createWorker(
+              remainingMutations, this.testClasses);
+      worker.start();
+
+      setFirstMutationToStatusOfStartedInCaseMinionFailsAtBoot(mutations,
+              remainingMutations);
+
+      exitCode = waitForMinionToDie(worker);
+      worker.results(mutations);
+      end = System.currentTimeMillis();
+      System.out.println("KP_NormalEnd: " + dumpUncoveredStatistics(mutations.getUnCoveredMutations()));
+      System.out.println("KP_NormalTime: " + (end - start));
+    }
 
     if (System.getenv("PIT_RERUN_FRESH_JVM") != null) {
       for (int i = 0; i < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))); i++) {

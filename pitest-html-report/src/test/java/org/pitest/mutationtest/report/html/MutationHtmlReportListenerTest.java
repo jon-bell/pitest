@@ -89,7 +89,7 @@ public class MutationHtmlReportListenerTest {
     final String fileName = "foo.java";
     final MutationResult mr = new MutationResult(
         MutationTestResultMother.createDetails(fileName),
-        new MutationStatusTestPair(1, DetectionStatus.KILLED, "testName"));
+        new MutationStatusTestPair(1, DetectionStatus.KILLED, "testName", "exception"));
     when(this.sourceLocator.locate(any(Collection.class), any(String.class)))
         .thenReturn(Optional.<Reader> empty());
     this.testee.handleMutationResult(MutationTestResultMother

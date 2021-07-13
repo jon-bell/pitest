@@ -82,7 +82,7 @@ public enum DetectionStatus {
   SURVIVED_NOT_COVERED(false),
 
   /**
-   * Muation should have been covered, was never covered, and we saw both survived, killed
+   * Mutation should have been covered, was never covered, and we saw both survived, killed
    */
   UNKNOWN_WEIRD(false),
 
@@ -94,7 +94,13 @@ public enum DetectionStatus {
   /**
    * In process of running; some tests have not yet covered it
    */
-  NOT_TRIED_FULLY(false);
+  NOT_TRIED_FULLY(false),
+
+  /**
+   * The mutant has both survived and bene killed by the same test (across reruns)
+   */
+  FLAKY(false);
+
   private final boolean detected;
 
   DetectionStatus(final boolean detected) {

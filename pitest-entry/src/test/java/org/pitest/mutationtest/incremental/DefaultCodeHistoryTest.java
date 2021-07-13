@@ -55,7 +55,7 @@ public class DefaultCodeHistoryTest {
   public void shouldReturnHistoricResultWhenOneExists() {
     final MutationIdentifier id = aMutationId().build();
     final MutationStatusTestPair expected = new MutationStatusTestPair(0,
-        DetectionStatus.KILLED, "foo");
+        DetectionStatus.KILLED, "foo", "exception");
     this.results.put(id, expected);
     final Optional<MutationStatusTestPair> actual = this.testee
         .getPreviousResult(id);

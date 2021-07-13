@@ -92,7 +92,7 @@ public class MutationTestWorkerTest {
             any(byte[].class))).thenReturn(true);
     this.testee.run(range, this.reporter, this.testSource);
     verify(this.reporter).report(mutantOne.getId(),
-        new MutationStatusTestPair(1, DetectionStatus.SURVIVED, new ArrayList<>(),  new ArrayList<>(), new ArrayList<>()));
+        new MutationStatusTestPair(1, DetectionStatus.SURVIVED, new ArrayList<>(),  new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
 
   }
 
@@ -125,7 +125,7 @@ public class MutationTestWorkerTest {
     verify(this.reporter).report(
         mutantOne.getId(),
         new MutationStatusTestPair(1, DetectionStatus.KILLED, tu
-            .getDescription().getName()));
+            .getDescription().getName(), "FakeException"));
   }
 
   private TestUnit makeFailingTest() {

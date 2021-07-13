@@ -14,6 +14,8 @@
  */
 package org.pitest.mutationtest.execute;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import org.pitest.mutationtest.DetectionStatus;
@@ -26,11 +28,19 @@ public class CheckTestHasFailedResultListener implements TestListener {
   private final List<Description> coveringTests = new ArrayList<>();
   private final List<Description>   succeedingTests = new ArrayList<>();
   private final List<Description>   failingTests = new ArrayList<>();
+  private final List<String>        failingTestExceptions = new ArrayList<>();
   private final boolean       recordPassingTests;
   private int                 testsRun        = 0;
 
   public CheckTestHasFailedResultListener(boolean recordPassingTests) {
     this.recordPassingTests = recordPassingTests;
+  }
+
+  private static String throwableToString(Throwable t) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    t.printStackTrace(pw);
+    return sw.toString();
   }
 
   @Override
@@ -39,6 +49,7 @@ public class CheckTestHasFailedResultListener implements TestListener {
       coveringTests.add(tr.getDescription());
     }
     this.failingTests.add(tr.getDescription());
+    this.failingTestExceptions.add(throwableToString(tr.getThrowable()));
   }
 
   @Override
@@ -81,6 +92,10 @@ public class CheckTestHasFailedResultListener implements TestListener {
 
   public List<Description> getFailingTests() {
     return failingTests;
+  }
+
+  public List<String> getFailingTestExceptions() {
+    return failingTestExceptions;
   }
 
   public List<Description> getCoveringTests() {

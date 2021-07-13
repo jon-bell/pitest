@@ -16,6 +16,7 @@ package org.pitest.mutationtest;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class MutationStatusTestPair implements Serializable {
 
@@ -24,26 +25,30 @@ public final class MutationStatusTestPair implements Serializable {
   private int             numberOfTestsRun;
   private DetectionStatus status;
   private final List<String>    killingTests;
+  private final List<String>    killingExceptions;
   private final List<String>    succeedingTests;
   private final List<String>    coveringTests;
   private final HashMap<String, Integer> timesSeen = new HashMap<>();
 
   public static MutationStatusTestPair notAnalysed(int testsRun, DetectionStatus status) {
-    return new MutationStatusTestPair(testsRun, status, Collections.emptyList(), Collections.emptyList(),
+    return new MutationStatusTestPair(testsRun, status, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
       Collections.emptyList());
   }
 
   public MutationStatusTestPair(final int numberOfTestsRun,
-      final DetectionStatus status, final String killingTest) {
+      final DetectionStatus status, final String killingTest, final String killingException) {
     this(numberOfTestsRun, status, killingTestToList(killingTest),
+      killingTestToList(killingException),
       Collections.emptyList(), Collections.emptyList());
   }
 
   public MutationStatusTestPair(final int numberOfTestsRun,
                                 final DetectionStatus status, final List<String> killingTests,
+                                final List<String> killingExceptions,
                                 final List<String> succeedingTests, final List<String> coveringTests) {
     this.status = status;
     this.killingTests = new LinkedList<>(killingTests);
+    this.killingExceptions = new LinkedList<>(killingExceptions);
     this.succeedingTests = new LinkedList<>(succeedingTests);
     this.numberOfTestsRun = numberOfTestsRun;
     this.coveringTests = new LinkedList<>(coveringTests);
@@ -69,12 +74,12 @@ public final class MutationStatusTestPair implements Serializable {
     }
   }
 
-  
+
   private static List<String> killingTestToList(String killingTest) {
     if (killingTest == null) {
       return Collections.emptyList();
     }
-    
+
     return Collections.singletonList(killingTest);
   }
 
@@ -93,8 +98,12 @@ public final class MutationStatusTestPair implements Serializable {
     return Optional.of(this.killingTests.get(0));
   }
 
+  public List<String> getKillingExceptions() {
+    return killingExceptions;
+  }
+
   /** Get all killing tests.
-   *  If the full mutation matrix is not enabled, this will only be the first killing test. 
+   *  If the full mutation matrix is not enabled, this will only be the first killing test.
    */
   public List<String> getKillingTests() {
     return killingTests;
@@ -105,7 +114,7 @@ public final class MutationStatusTestPair implements Serializable {
   }
 
   /** Get all succeeding tests.
-   *  If the full mutation matrix is not enabled, this list will be empty. 
+   *  If the full mutation matrix is not enabled, this list will be empty.
    */
   public List<String> getSucceedingTests() {
     return succeedingTests;
@@ -166,7 +175,7 @@ public final class MutationStatusTestPair implements Serializable {
     return true;
   }
 
-  private int runCount = 0;
+  private int runCount = 1;
   private String renameTestIfPreviouslySeen(String test){
     Integer idx = this.timesSeen.putIfAbsent(test,1);
     if(idx == null)
@@ -190,6 +199,10 @@ public final class MutationStatusTestPair implements Serializable {
       ret.add(map.get(s));
     }
     return ret;
+  }
+
+  private Set<String> removeRunIndices(Collection<String> in){
+    return in.stream().map(str -> str.contains("#") ? str.substring(0,str.indexOf('#')) : str).collect(Collectors.toSet());
   }
 
   public void checkForNotFullyTried(){
@@ -223,12 +236,13 @@ public final class MutationStatusTestPair implements Serializable {
       this.succeedingTests.addAll(status.getSucceedingTests());
       this.coveringTests.addAll(status.getCoveringTests());
     }
+    this.killingExceptions.addAll(status.getKillingExceptions());
     this.numberOfTestsRun+=status.getNumberOfTestsRun();
 
     this.status = status.status;
 
     allTests.removeAll(status.getCoveringTests());
-    if (allTests.size() > 0 && runCount < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT")) * 3 + 1))
+    if ((allTests.size() > 0 || System.getenv("PIT_ALWAYS_RERUN") != null) && runCount + 1 < (System.getenv("PIT_RERUN_COUNT") == null ? 5 : Integer.valueOf(System.getenv("PIT_RERUN_COUNT"))))
     {
       //Still not done yet, this test is not determined
       this.status = DetectionStatus.NOT_TRIED_FULLY;
@@ -240,8 +254,17 @@ public final class MutationStatusTestPair implements Serializable {
       killingCovering.retainAll(this.coveringTests);
       HashSet<String> succCovering = new HashSet<>(this.coveringTests);
       succCovering.retainAll(this.coveringTests);
-      if(killingCovering.size() > 0)
+      if(killingCovering.size() > 0){
         this.status = DetectionStatus.KILLED;
+        //Make sure that we weren't in fact just flaky...
+        Set<String> killing = removeRunIndices(this.killingTests);
+        Set<String> succeeding = removeRunIndices(this.succeedingTests);
+        for (String testKilling : killing) {
+          if (succeeding.contains(testKilling)) {
+            this.status = DetectionStatus.FLAKY;
+          }
+        }
+      }
       else if(this.killingTests.size() > 0 && this.succeedingTests.size() == 0)
         this.status = DetectionStatus.KILLED_NOT_COVERED;
       else if(this.killingTests.size() > 0)
@@ -252,6 +275,7 @@ public final class MutationStatusTestPair implements Serializable {
         this.status = DetectionStatus.SURVIVED_NOT_COVERED;
       else
         this.status = DetectionStatus.UNKNOWN_WEIRD;
+
       if (status.status == DetectionStatus.MEMORY_ERROR
           || status.status == DetectionStatus.NON_VIABLE
           || status.status == DetectionStatus.TIMED_OUT
