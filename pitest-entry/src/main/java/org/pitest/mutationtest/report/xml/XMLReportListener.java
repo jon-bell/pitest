@@ -129,7 +129,7 @@ public class XMLReportListener implements MutationResultListener {
       ret.append(tag);
       if(base64Encode){
         ret.append(" encoding=\"base64\">");
-        ret.append(Base64.getEncoder().encode(each.getBytes()));
+        ret.append(Base64.getEncoder().encodeToString(each.getBytes()));
         ret.append('<');
       }else {
         ret.append("><![CDATA[\n");
