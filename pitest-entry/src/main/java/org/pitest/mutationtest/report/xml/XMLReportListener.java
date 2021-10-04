@@ -17,6 +17,7 @@ package org.pitest.mutationtest.report.xml;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,7 +84,7 @@ public class XMLReportListener implements MutationResultListener {
         + makeNodeWhenConditionSatisfied(fullMutationMatrix,
             createTestDesc(mutation.getKillingTests()), killingTests)
         + makeNodeWhenConditionSatisfied(fullMutationMatrix,
-            mutation.getKillingExceptions(), killingException)
+            mutation.getKillingExceptions(), killingException, true)
         + makeNodeWhenConditionSatisfied(fullMutationMatrix,
             createTestDesc(mutation.getCoveringTests()), coveringTests)
         + makeNodeWhenConditionSatisfied(fullMutationMatrix,
@@ -114,7 +115,7 @@ public class XMLReportListener implements MutationResultListener {
   }
 
   private String makeNodeWhenConditionSatisfied(final boolean condition, final List<String> values,
-                                                final Tag tag) {
+                                                final Tag tag, final boolean base64Encode) {
     if (!condition) {
       return "";
     }
@@ -126,9 +127,15 @@ public class XMLReportListener implements MutationResultListener {
     for (String each : values) {
       ret.append('<');
       ret.append(tag);
-      ret.append("><![CDATA[\n");
-      ret.append(each);
-      ret.append("\n]]><");
+      if(base64Encode){
+        ret.append(" encoding=\"base64\">");
+        ret.append(Base64.getEncoder().encode(each.getBytes()));
+        ret.append('<');
+      }else {
+        ret.append("><![CDATA[\n");
+        ret.append(each.replace("]]", "\\]\\]"));
+        ret.append("\n]]><");
+      }
       ret.append('/');
       ret.append(tag);
       ret.append('>');
