@@ -37,7 +37,7 @@ public class MutationStatusMap {
 
   public void setStatusForMutation(final MutationDetails mutation,
       final MutationStatusTestPair status) {
-    if (this.mutationMap.containsKey(mutation) && this.mutationMap.get(mutation).getStatus() != DetectionStatus.NOT_STARTED) {
+    if (this.mutationMap.containsKey(mutation) && this.mutationMap.get(mutation).getNumberOfTestsRun() > 0) {
       MutationStatusTestPair existing = this.mutationMap.get(mutation);
       existing.accumulate(status, true);
     } else {
