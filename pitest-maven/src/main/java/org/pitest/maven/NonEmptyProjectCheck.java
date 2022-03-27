@@ -11,10 +11,9 @@ public class NonEmptyProjectCheck implements Predicate<MavenProject> {
   @SuppressWarnings("unchecked")
   @Override
   public boolean test(MavenProject project) {
-    return FCollection.contains(project.getTestCompileSourceRoots(), exists()) 
-        && FCollection.contains(project.getCompileSourceRoots(), exists());
+    return FCollection.contains(project.getTestCompileSourceRoots(), exists());
   }
-  
+
   private Predicate<String> exists() {
     return new Predicate<String>() {
       @Override

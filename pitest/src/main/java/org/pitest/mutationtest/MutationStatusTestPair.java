@@ -177,13 +177,15 @@ public final class MutationStatusTestPair implements Serializable {
 
   private int runCount = 1;
   private String renameTestIfPreviouslySeen(String test){
-    Integer idx = this.timesSeen.putIfAbsent(test,1);
-    if(idx == null)
-      return test;
-    this.timesSeen.put(test,idx+1);
-    if(idx > runCount)
-      runCount = idx;
-    return test+"#"+idx;
+    synchronized (timesSeen) {
+      Integer idx = this.timesSeen.putIfAbsent(test, 1);
+      if (idx == null)
+        return test;
+      this.timesSeen.put(test, idx + 1);
+      if (idx > runCount)
+        runCount = idx;
+      return test + "#" + idx;
+    }
   }
   private HashMap<String,String> renameTests(Iterable<String> in){
     HashMap<String,String> ret = new HashMap<>();

@@ -15,14 +15,9 @@
 package org.pitest.maven;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -86,11 +81,23 @@ public class MojoToReportOptionsConverter {
   private ReportOptions parseReportOptions(final List<String> classPath) {
     final ReportOptions data = new ReportOptions();
 
-    if (this.mojo.getProject().getBuild() != null) {
-      this.log.info("Mutating from "
-          + this.mojo.getProject().getBuild().getOutputDirectory());
-      data.setCodePaths(Collections.singleton(this.mojo.getProject().getBuild()
-          .getOutputDirectory()));
+    String buildDirs = this.mojo.getProject().getProperties().getProperty("buildDirs");
+    if(buildDirs != null){
+      LinkedList<String> buildDirsList = new LinkedList<>();
+      for(String path : buildDirs.split(",")){
+        if(Files.isDirectory(Paths.get(path))){
+          buildDirsList.add(path);
+        }
+      }
+      this.log.info("Mutating from " + buildDirsList);
+      data.setCodePaths(buildDirsList);
+    }
+    else
+      if (this.mojo.getProject().getBuild() != null) {
+        this.log.info("Mutating from "
+                + this.mojo.getProject().getBuild().getOutputDirectory());
+        data.setCodePaths(Collections.singleton(this.mojo.getProject().getBuild()
+                .getOutputDirectory()));
     }
 
     data.setUseClasspathJar(this.mojo.isUseClasspathJar());
@@ -141,7 +148,7 @@ public class MojoToReportOptionsConverter {
     data.setDetectInlinedCode(this.mojo.isDetectInlinedCode());
 
     determineHistory(data);
-    
+
     data.setExportLineCoverage(this.mojo.isExportLineCoverage());
     data.setMutationEngine(this.mojo.getMutationEngine());
     data.setJavaExecutable(this.mojo.getJavaExecutable());
@@ -180,7 +187,7 @@ public class MojoToReportOptionsConverter {
       data.setHistoryOutputLocation(historyFile);
     }
   }
-  
+
   private ReportOptions updateFromSurefire(ReportOptions option) {
     Collection<Plugin> plugins = lookupPlugin("org.apache.maven.plugins:maven-surefire-plugin");
     if (!this.mojo.isParseSurefireConfig()) {
@@ -260,8 +267,8 @@ public class MojoToReportOptionsConverter {
       } else {
         return Collections.emptyList();
       }
-  }  
-  
+  }
+
   private Collection<String> determineTargetClasses() {
     return useConfiguredTargetClassesOrFindOccupiedPackages(this.mojo.getTargetClasses());
   }
@@ -275,15 +282,15 @@ public class MojoToReportOptionsConverter {
       return filters;
     }
   }
-  
-  
+
+
   private Collection<String> findOccupiedPackages() {
     String outputDirName = this.mojo.getProject().getBuild()
         .getOutputDirectory();
     File outputDir = new File(outputDirName);
     return findOccupiedPackagesIn(outputDir);
   }
-  
+
   public static Collection<String> findOccupiedPackagesIn(File dir) {
     if (dir.exists()) {
       DirectoryClassPathRoot root = new DirectoryClassPathRoot(dir);
@@ -294,7 +301,7 @@ public class MojoToReportOptionsConverter {
     }
     return Collections.emptyList();
   }
-  
+
   private static Function<String,String> classToPackageGlob() {
     return a -> ClassName.fromString(a).getPackage().asJavaName() + ".*";
   }

@@ -30,6 +30,11 @@ public class WrappingProcess {
     this.processArgs = args;
     this.minionClass = minionClass;
 
+    if(System.getenv("DEBUG_MINION") != null){
+      List<String> jvmArgs = new LinkedList<>(this.processArgs.getJvmArgs());
+      jvmArgs.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005");
+      this.processArgs.setJvmArgs(jvmArgs);
+    }
     if(System.getenv("VMVM_JAR") != null)
     {
       List<String> jvmArgs = new LinkedList<>(this.processArgs.getJvmArgs());
