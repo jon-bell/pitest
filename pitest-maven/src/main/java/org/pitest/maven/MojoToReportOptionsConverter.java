@@ -87,6 +87,7 @@ public class MojoToReportOptionsConverter {
       for(String path : buildDirs.split(",")){
         if(Files.isDirectory(Paths.get(path))){
           buildDirsList.add(path);
+          classPath.add(path);
         }
       }
       this.log.info("Mutating from " + buildDirsList);
