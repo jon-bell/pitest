@@ -84,7 +84,7 @@ public class XMLReportListener implements MutationResultListener {
         + makeNodeWhenConditionSatisfied(fullMutationMatrix,
             createTestDesc(mutation.getKillingTests()), killingTests)
         + makeNodeWhenConditionSatisfied(fullMutationMatrix,
-            mutation.getKillingExceptions(), killingException, true)
+            mutation.getKillingExceptions(), killingException, System.getenv("DEBUG_EXCEPTIONS") == null)
         + makeNodeWhenConditionSatisfied(fullMutationMatrix,
             createTestDesc(mutation.getCoveringTests()), coveringTests)
         + makeNodeWhenConditionSatisfied(fullMutationMatrix,

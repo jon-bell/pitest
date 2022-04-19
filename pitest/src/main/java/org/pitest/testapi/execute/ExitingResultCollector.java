@@ -23,6 +23,7 @@ public class ExitingResultCollector implements ResultCollector {
   private final ResultCollector child;
   private boolean               hadFailure = false;
   private boolean               covered = false;
+  private boolean               ended = false;
 
   public ExitingResultCollector(final ResultCollector child) {
     this.child = child;
@@ -49,8 +50,11 @@ public class ExitingResultCollector implements ResultCollector {
 
   @Override
   public void notifyEnd(final Description description, final Throwable t) {
-    this.child.notifyEnd(description, t);
-    this.covered = MutantCoverageRuntime.isHit;
+    if(!this.ended) { //If a test fails in both before and after, it will be recorded twice. Only send the first error to pit.
+      this.child.notifyEnd(description, t);
+    }
+    this.ended = true;
+    this.covered |= MutantCoverageRuntime.isHit;
     if (t != null) {
       this.hadFailure = true;
     }
